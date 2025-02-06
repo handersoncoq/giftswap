@@ -65,12 +65,10 @@ struct CategoryMarketplaceView: View {
                         }
                         .disabled(currentPage <= 1)
 
-                        Spacer()
 
-                        Text("Page \(currentPage)")
+                        Text("\(currentPage) / \(totalPages)")
                             .font(.headline)
 
-                        Spacer()
 
                         Button(action: nextPage) {
                             Image(systemName: "arrow.right.circle.fill")
@@ -89,6 +87,7 @@ struct CategoryMarketplaceView: View {
                 updatePaginatedGifts()
             }
         }
+        
     }
 
     private var totalPages: Int {
