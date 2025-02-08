@@ -11,6 +11,7 @@ class NavigationManager: ObservableObject {
     @Published var path = NavigationPath()
 
     func popToRoot() {
-        path = NavigationPath() 
+        path.removeLast(path.count)
     }
+
 }

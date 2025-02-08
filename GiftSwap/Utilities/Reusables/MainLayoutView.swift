@@ -22,17 +22,19 @@ struct MainLayoutView<Content: View>: View {
             ZStack(alignment: .top) {
                 Spacer()
                 VStack(spacing: 0) {
-                    content
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .padding(.top, 35)
-                    BottomNav()
+                    Spacer()
+                    VStack(spacing: 0){
+                        content
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding(.top, 35)
+                    }.background(Color("App_Primary").opacity(0.05)).padding(.top, 10)
+                    BottomNav().background(Color("App_Neutral"))
                 }
                 
                 VStack(spacing: 0) {
-                    TopNav(isRootView: isRootView)
+                    TopNav(isRootView: isRootView, navManager: navigationManager)
                         .frame(maxWidth: .infinity)
-                        .background(Color("App_Neutral").opacity(0.95))
-                        .padding(.bottom, 15)
+                        .background(Color("App_Neutral"))
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
@@ -40,6 +42,7 @@ struct MainLayoutView<Content: View>: View {
         }
     }
 }
+
 
 
 

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject var navManager = NavigationManager()
     @State private var showHomeView = false
 
     var body: some View {
@@ -15,29 +16,39 @@ struct ContentView: View {
             if showHomeView {
                 HomeView()
                     .transition(.opacity)
+                    .environmentObject(navManager)
             } else {
-                VStack {
-                    LogoAnimation()
-                    Text(LocalizedStringKey("app_name"))
-                        .font(.largeTitle)
-                        .foregroundColor(Color.white)
-                }
-                .padding()
-                .transition(.opacity)
+                splashScreenView
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color("App_Primary"))
         .ignoresSafeArea()
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                withAnimation {
-                    showHomeView = true
-                }
+            scheduleHomeViewTransition()
+        }
+    }
+
+    private var splashScreenView: some View {
+        VStack {
+            LogoAnimation()
+            Text(LocalizedStringKey("app_name"))
+                .font(.largeTitle)
+                .foregroundColor(Color.white)
+        }
+        .padding()
+        .transition(.opacity)
+    }
+
+    private func scheduleHomeViewTransition() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            withAnimation {
+                showHomeView = true
             }
         }
     }
 }
+
 
 
 #Preview {

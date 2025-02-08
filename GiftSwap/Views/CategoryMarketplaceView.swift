@@ -20,74 +20,80 @@ struct CategoryMarketplaceView: View {
     ]
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("\(category.rawValue.capitalized) Gifts").font(.largeTitle)
-                .bold().padding()
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
-                
-                TextField("Search gifts...", text: $viewModel.searchText, prompt: Text("Search gifts...").fontWeight(.medium).foregroundColor(.gray))
-                    .onChange(of: viewModel.searchText) { oldValue, newValue in
-                        // Reset pagination when search text changes
-                        currentPage = 1
-                        updatePaginatedGifts()
-                    }
-
+        MainLayoutView(isRootView: false) {
+            VStack(alignment: .leading) {
+                categoryTitle
+                searchBar
+                giftsGrid
             }
-            .padding(10)
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(10)
+            .onAppear(perform: loadGifts)
+        }
+        .navigationBarBackButtonHidden(true)
+    }
+
+    private var categoryTitle: some View {
+        Text("\(category.rawValue.capitalized) Gifts")
+            .font(.largeTitle)
+            .bold()
+            .padding()
+    }
+
+    private var searchBar: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.black.opacity(0.5))
+            
+            TextField("Search gifts...", text: $viewModel.searchText, prompt: Text("Search gifts...").fontWeight(.medium).foregroundColor(.black.opacity(0.5)))
+                .onChange(of: viewModel.searchText) { oldValue, newValue in
+                    currentPage = 1
+                    updatePaginatedGifts()
+                }
+        }
+        .padding(10)
+        .background(Color("App_Primary").opacity(0.06))
+        .cornerRadius(10)
+        .padding(.horizontal)
+        .padding(.bottom, 20)
+    }
+
+    private var giftsGrid: some View {
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 4) {
+                ForEach(paginatedGifts) { gift in
+                    NavigationLink(destination: GiftDetailView(gift: gift)) {
+                        SmallGiftCard(gift: gift)
+                    }
+                }
+            }
             .padding(.horizontal)
-            .padding(.bottom, 20)
 
-            // Gifts Grid
-            ScrollView {
-                LazyVGrid(columns: [
-                    GridItem(.fixed(180)),
-                    GridItem(.fixed(180))
-                ], spacing: 4) {
-                    ForEach(paginatedGifts) { gift in
-                        NavigationLink(destination: GiftDetailView(gift: gift)) {
-                            SmallGiftCard(gift: gift)
-                        }
-                    }
-                }
-                .padding(.horizontal)
-
-                // Pagination Navigation Indicators
-                if viewModel.filteredGifts.count > itemsPerPage {
-                    HStack {
-                        Button(action: previousPage) {
-                            Image(systemName: "arrow.left.circle.fill")
-                                .font(.largeTitle)
-                                .foregroundColor(currentPage > 1 ? .blue : .gray)
-                        }
-                        .disabled(currentPage <= 1)
-
-
-                        Text("\(currentPage) / \(totalPages)")
-                            .font(.headline)
-
-
-                        Button(action: nextPage) {
-                            Image(systemName: "arrow.right.circle.fill")
-                                .font(.largeTitle)
-                                .foregroundColor(currentPage < totalPages ? .blue : .gray)
-                        }
-                        .disabled(currentPage >= totalPages)
-                    }
-                    .padding()
-                }
+            if viewModel.filteredGifts.count > itemsPerPage {
+                paginationControls
             }
         }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                viewModel.loadCategoryGifts(category: category)
-                updatePaginatedGifts()
+    }
+
+    private var paginationControls: some View {
+        HStack {
+            Button(action: previousPage) {
+                Image(systemName: "arrow.left.circle.fill")
+                    .font(.largeTitle)
+                    .foregroundColor(currentPage > 1 ? .blue : .gray)
             }
+            .disabled(currentPage <= 1)
+
+            Text("\(currentPage) / \(totalPages)")
+                .font(.headline)
+
+            Button(action: nextPage) {
+                Image(systemName: "arrow.right.circle.fill")
+                    .font(.largeTitle)
+                    .foregroundColor(currentPage < totalPages ? .blue : .gray)
+            }
+            .disabled(currentPage >= totalPages)
         }
-        
+        .padding()
+        .padding(.bottom, 45)
     }
 
     private var totalPages: Int {
@@ -118,8 +124,14 @@ struct CategoryMarketplaceView: View {
             updatePaginatedGifts()
         }
     }
-}
 
+    private func loadGifts() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            viewModel.loadCategoryGifts(category: category)
+            updatePaginatedGifts()
+        }
+    }
+}
 
 struct CategoryMarketplaceView_Previews: PreviewProvider {
     static var previews: some View {

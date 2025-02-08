@@ -62,7 +62,7 @@ struct GiftCard: View {
                 
 
                 // Swap Status Badge (Using Reusable View)
-                SwapStatusView(status: gift.swapStatus)
+                SwapStatusView(status: gift.swapStatus).padding(.bottom)
 
 
                 // External Store Link (if available)
@@ -72,7 +72,7 @@ struct GiftCard: View {
                             .font(.caption)
                             .foregroundColor(Color.blue)
                             .padding(.bottom)
-                            .padding(.top, 6)
+                            .padding(.top, -6)
                     }
                 }
             }
@@ -82,7 +82,7 @@ struct GiftCard: View {
         }
         .background(Color(.systemBackground))
         .cornerRadius(18)
-        .shadow(radius: 4)
+        .shadow(radius: 10)
         .padding(.horizontal)
         .padding(.bottom, 6)
     }

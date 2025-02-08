@@ -44,7 +44,7 @@ struct SwapStatusView: View {
 
         switch status {
         case .available:
-            iconName = "arrow.triangle.swap"
+            iconName = "arrow.2.circlepath"
             iconColor = Color("App_Primary")
         case .inBasket:
             iconName = "tray.full"

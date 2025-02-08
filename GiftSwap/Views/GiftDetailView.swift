@@ -23,13 +23,12 @@ struct GiftDetailView: View {
                                         switch phase {
                                         case .empty:
                                             ProgressView()
-                                                .frame(height: 350)
+                                                .frame(height: 300)
                                             
                                         case .success(let image):
                                             image
                                                 .resizable()
-                                               
-                                                .frame(maxWidth: 450).frame(height: 300)
+                                                .frame(maxWidth: 450).frame(height: 270)
                                                 .cornerRadius(16)
                                             
                                         case .failure:
@@ -43,7 +42,7 @@ struct GiftDetailView: View {
                                     .tag(index)
                                 }
                             }
-                            .frame(height: 300)
+                            .frame(height: 270)
                             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                             
                             // Image Indicator
@@ -51,9 +50,8 @@ struct GiftDetailView: View {
                                 Text("\(currentIndex + 1)/\(images.count)")
                                     .font(.body)
                                     .foregroundColor(Color("App_Primary"))
-                                    .cornerRadius(8)
                                     .frame(maxWidth: .infinity, alignment: .center)
-                                    .offset(y: 170)
+                                    .offset(y: 152)
     
                             }
                         }.padding(.bottom, 30)
@@ -101,7 +99,8 @@ struct GiftDetailView: View {
                         },
                         icon: Image(systemName: "arrow.2.circlepath")
                     )
-                    .padding(.vertical)
+                    .padding(.bottom, 45)
+                    .padding(.top, 8)
                     .disabled(gift.swapStatus != .available)
                     .opacity(gift.swapStatus == .available ? 1 : 0.5)
                 }
