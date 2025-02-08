@@ -72,24 +72,23 @@ struct GiftDetailView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    Text("Value: $\(gift.value, specifier: "%.2f")")
-                        .font(.body)
-                        .foregroundColor(Color.blue)
+                    HStack(){ Text("Value: $\(gift.value, specifier: "%.2f")")
+                            .font(.body)
+                            .foregroundColor(Color.blue)
+                        
+                        VStack {
+                            if let storeLink = gift.storeLink, let url = URL(string: storeLink) {
+                                Link(destination: url) {
+                                    Image(systemName: "link")
+                                }
+                            }
+                        }
+                    }
                     
                     // Swap Status Badge (Using Reusable View)
                     SwapStatusView(status: gift.swapStatus)
                     
                     
-                    // External Store Link (if available)
-                    VStack {
-                        if let storeLink = gift.storeLink, let url = URL(string: storeLink) {
-                            Link(destination: url) {
-                                Text("View in Store")
-                                    .font(.caption)
-                                    .foregroundColor(Color.blue)
-                            }
-                        }
-                    }
                     
                     CTAButton(
                         label: "Swap With A Gift In Your Basket",

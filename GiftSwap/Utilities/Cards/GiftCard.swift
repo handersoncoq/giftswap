@@ -62,22 +62,11 @@ struct GiftCard: View {
                 
 
                 // Swap Status Badge (Using Reusable View)
-                SwapStatusView(status: gift.swapStatus).padding(.bottom)
+                SwapStatusView(status: gift.swapStatus).padding(.vertical, 10)
 
-
-                // External Store Link (if available)
-                if let storeLink = gift.storeLink, let url = URL(string: storeLink) {
-                    Link(destination: url) {
-                        Text("View in Store")
-                            .font(.caption)
-                            .foregroundColor(Color.blue)
-                            .padding(.bottom)
-                            .padding(.top, -6)
-                    }
-                }
             }
             .padding(.horizontal)
-            .padding(.bottom, 6)
+            .padding(.bottom)
             
         }
         .background(Color(.systemBackground))

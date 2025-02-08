@@ -56,18 +56,10 @@ struct SmallGiftCard: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
 
-                SwapStatusView(status: gift.swapStatus)
-
-                if let storeLink = gift.storeLink, let url = URL(string: storeLink) {
-                    Link(destination: url) {
-                        Text("View in Store")
-                            .font(.caption)
-                            .foregroundColor(Color.blue)
-                    }
-                }
+                SwapStatusView(status: gift.swapStatus).padding(.vertical, 10)
             }
             .padding(.horizontal, 8)
-            .padding(.bottom, 6)
+            .padding(.bottom, 8)
         }
         .background(Color(.systemBackground))
         .cornerRadius(14)

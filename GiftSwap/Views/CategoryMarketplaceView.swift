@@ -58,7 +58,7 @@ struct CategoryMarketplaceView: View {
 
     private var giftsGrid: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: 4) {
+            LazyVGrid(columns: columns, spacing: 18) {
                 ForEach(paginatedGifts) { gift in
                     NavigationLink(destination: GiftDetailView(gift: gift)) {
                         SmallGiftCard(gift: gift)
