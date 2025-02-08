@@ -45,8 +45,7 @@ struct CTAButton: View {
                     icon
                         .font(.system(size: 35))
                         .foregroundColor(Color.white.opacity(0.2))
-                        .offset(x: 148, y: -56)
-                        .rotationEffect(.degrees(20))
+                        .offset(x: 158, y: 0)
                 }
 
                 // Label

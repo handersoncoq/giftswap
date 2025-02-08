@@ -55,17 +55,17 @@ struct MockGifts {
             swapStatus: .available,
             addedAt: Date()
         ),
-        Gift(
-            name: "Personalized Notebook",
-            description: "A custom notebook with an elegant design, perfect for journaling.",
-            imageURLs: ["https://picsum.photos/300/200"],
-            value: 19.99,
-            isAvailable: true,
-            category: .other,
-            ownerId: MockUsers.users[1].id,
-            swapStatus: .available,
-            addedAt: Date()
-        ),
+//        Gift(
+//            name: "Personalized Notebook",
+//            description: "A custom notebook with an elegant design, perfect for journaling.",
+//            imageURLs: ["https://picsum.photos/300/200"],
+//            value: 19.99,
+//            isAvailable: true,
+//            category: .other,
+//            ownerId: MockUsers.users[1].id,
+//            swapStatus: .available,
+//            addedAt: Date()
+//        ),
         Gift(
                 name: "Wireless Earbuds",
                 description: "Noise-cancelling wireless earbuds with 20-hour battery life.",
@@ -156,15 +156,15 @@ struct MockGifts {
                 ownerId: MockUsers.users[4].id,
                 swapStatus: .available
             ),
-            Gift(
-                name: "Board Game",
-                description: "Family board game for 2-6 players.",
-                imageURLs: ["https://picsum.photos/300/200", "https://picsum.photos/300/200"],
-                value: 39.99,
-                category: .toys,
-                ownerId: MockUsers.users[2].id,
-                swapStatus: .available
-            ),
+//            Gift(
+//                name: "Board Game",
+//                description: "Family board game for 2-6 players.",
+//                imageURLs: ["https://picsum.photos/300/200", "https://picsum.photos/300/200"],
+//                value: 39.99,
+//                category: .toys,
+//                ownerId: MockUsers.users[2].id,
+//                swapStatus: .available
+//            ),
                 Gift(id: UUID(), name: "Designer Handbag", description: "Elegant leather handbag.", imageURLs: nil, value: 250.0, isAvailable: true, storeLink: nil, category: .fashion, ownerId: UUID(), swapStatus: .inBasket, addedAt: Date()),
                 Gift(id: UUID(), name: "Luxury Sunglasses", description: "Stylish UV-protected sunglasses.", imageURLs: nil, value: 180.0, isAvailable: true, storeLink: nil, category: .fashion, ownerId: UUID(), swapStatus: .inBasket, addedAt: Date()),
                 Gift(id: UUID(), name: "Leather Boots", description: "Premium leather boots.", imageURLs: nil, value: 320.0, isAvailable: true, storeLink: nil, category: .fashion, ownerId: UUID(), swapStatus: .inBasket, addedAt: Date()),
