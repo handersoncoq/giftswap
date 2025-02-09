@@ -88,7 +88,7 @@ struct GiftImageCarousel: View {
                             case .empty:
                                 ProgressView().frame(height: 300)
                             case .success(let image):
-                                image.resizable().frame(maxWidth: 450).frame(height: 270).cornerRadius(16)
+                                image.resizable().frame(maxWidth: 450, maxHeight: 270).cornerRadius(16)
                             case .failure:
                                 PlaceholderView().frame(height: 300)
                             @unknown default:

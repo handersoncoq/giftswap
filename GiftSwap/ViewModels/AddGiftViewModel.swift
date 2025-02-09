@@ -63,7 +63,7 @@ class AddGiftViewModel: ObservableObject {
         let newGift = Gift(
             name: giftName,
             description: giftDescription,
-            imageURLs: imagePreviews.map { _ in "placeholder_image_url" }, // Mocked URLs
+            imageURLs: saveImagesTemporarily(), // TEMPORARY
             value: value,
             isAvailable: true,
             storeLink: storeLink.isEmpty ? nil : storeLink,
@@ -73,9 +73,42 @@ class AddGiftViewModel: ObservableObject {
             addedAt: Date()
         )
 
+        // Add the new gift to GiftService
         _ = GiftService.shared.addGift(newGift)
-        _ = SwapBasketService.shared.fetchAllGiftsInSwapBaskets()
+        
+        // Create a SwapBasket entry for the new gift
+        let newSwapBasketItem = SwapBasket(
+            userId: newGift.ownerId,
+            giftId: newGift.id,
+            status: .inBasket
+        )
+        
+        // add it to SwapBasketService
+        SwapBasketService.shared.addGiftToSwapBasket(newSwapBasketItem)
 
         return nil
     }
+    
+    // TEMPORARY:
+    func saveImagesTemporarily() -> [String] {
+        var imageURLs: [String] = []
+
+        for (index, image) in imagePreviews.enumerated() {
+            if let imageData = image.jpegData(compressionQuality: 0.8) { // Convert to Data
+                let filename = "gift_image_\(index).jpg"
+                let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
+
+                do {
+                    try imageData.write(to: tempURL) // Save to temp storage
+                    imageURLs.append(tempURL.absoluteString) // Store the file URL as string
+                } catch {
+                    print("Error saving image: \(error.localizedDescription)")
+                }
+            }
+        }
+
+        return imageURLs
+    }
+
+
 }

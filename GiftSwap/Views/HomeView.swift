@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @StateObject private var navManager = NavigationManager()
     @State private var navigateToAddGift = false
     var body: some View {
         MainLayoutView(isRootView: true) {
@@ -36,7 +37,7 @@ struct HomeView: View {
             }.navigationDestination(isPresented: $navigateToAddGift) {
                 AddGiftView()
             }
-        }.navigationBarBackButtonHidden(true)
+        }.environmentObject(navManager).navigationBarBackButtonHidden(true)
     }
     
     private var ctaButtonSection: some View {

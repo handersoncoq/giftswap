@@ -8,10 +8,11 @@
 import SwiftUI
 
 class NavigationManager: ObservableObject {
-    @Published var path = NavigationPath()
+    @Published var path: [AnyHashable] = []
 
     func popToRoot() {
-        path.removeLast(path.count)
+        path.removeAll()
     }
-
 }
+
+

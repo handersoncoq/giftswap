@@ -11,34 +11,43 @@ import Combine
 
 struct AddGiftView: View {
     @Environment(\.presentationMode) var presentationMode
-    @StateObject private var viewModel = AddGiftViewModel()
-    @State private var showAlert = false
-    @State private var alertMessage = ""
+        @StateObject private var viewModel = AddGiftViewModel()
+        @State private var showAlert = false
+        @State private var alertMessage = ""
+        @State private var navigateToSwapBasket = false
 
     var body: some View {
-        MainLayoutView(isRootView: false) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Add a Gift to Your Swap Basket")
-                    .font(.largeTitle)
-                    .bold()
-                    .padding()
-                    .padding(.bottom, 20)
+           MainLayoutView(isRootView: false) {
+               VStack(alignment: .leading, spacing: 0) {
+                   Text("Add a Gift to Your Swap Basket")
+                       .font(.largeTitle)
+                       .bold()
+                       .padding()
+                       .padding(.bottom, 20)
 
-                ScrollView {
-                    VStack(spacing: 20) {
-                        giftImagesPicker
-                        giftInfoFields
-                        swapCategoryPicker
-                        addGiftButton
-                    }
-                }
-                .padding(.horizontal)
-            }
-            .alert(alertMessage, isPresented: $showAlert) {
-                Button("OK", role: .cancel) { }
-            }
-        }.navigationBarBackButtonHidden(true)
-    }
+                   ScrollView {
+                       VStack(spacing: 20) {
+                           giftImagesPicker
+                           giftInfoFields
+                           swapCategoryPicker
+                           addGiftButton
+                       }
+                   }
+                   .padding(.horizontal)
+               }
+               .alert(alertMessage, isPresented: $showAlert) {
+                   Button("OK", role: .cancel) {
+                       if navigateToSwapBasket {
+                           navigateToSwapBasket = true
+                       }
+                   }
+               }
+               .navigationDestination(isPresented: $navigateToSwapBasket) {
+                   SwapBasketView()
+               }
+           }
+           .navigationBarBackButtonHidden(true)
+       }
 
     // MARK: - Gift Image Picker
     private var giftImagesPicker: some View {
@@ -102,29 +111,29 @@ struct AddGiftView: View {
 
     // MARK: - Add Gift Button
     private var addGiftButton: some View {
-        VStack{
-            CTAButton(
-                label: "Add Gift to Swap Basket",
-                backgroundColor: Color("App_Primary"),
-                action: addGift,
-                icon: Image(systemName: "basket")
-            )}.padding(.bottom, 50)
-    }
+            VStack {
+                CTAButton(
+                    label: "Add Gift to Swap Basket",
+                    backgroundColor: Color("App_Primary"),
+                    action: addGift,
+                    icon: Image(systemName: "basket")
+                )
+            }
+            .padding(.bottom, 50)
+        }
 
     // MARK: - Add Gift Logic
-    private func addGift() {
-        let result = viewModel.addGiftToSwapBasket()
-        if let errorMessage = result {
-            alertMessage = errorMessage
-            showAlert = true
-        } else {
-            alertMessage = "Gift added successfully!"
-            showAlert = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                presentationMode.wrappedValue.dismiss()
+        private func addGift() {
+            let result = viewModel.addGiftToSwapBasket()
+            if let errorMessage = result {
+                alertMessage = errorMessage
+                showAlert = true
+            } else {
+                alertMessage = "Gift added successfully!"
+                showAlert = true
+                navigateToSwapBasket = true
             }
         }
-    }
 }
 
 #Preview{

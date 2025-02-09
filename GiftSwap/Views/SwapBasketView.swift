@@ -14,6 +14,8 @@ struct SwapBasketView: View {
     @State private var giftToRemove: Gift?
     @State private var showAlert = false
     @State private var alertMessage = ""
+    @State private var navigateToAddGift = false
+    @State private var expandedCategories: Set<GiftCategory> = []
 
     var body: some View {
         MainLayoutView(isRootView: false) {
@@ -22,6 +24,8 @@ struct SwapBasketView: View {
                 searchBar
                 giftList
                 Spacer()
+            }.onAppear {
+                viewModel.refreshSwapBasket()
             }
             .padding(.horizontal)
             .navigationBarBackButtonHidden(true)
@@ -36,6 +40,8 @@ struct SwapBasketView: View {
                 removeGiftButton
                 cancelButton
             }
+        }.navigationDestination(isPresented: $navigateToAddGift) {
+            AddGiftView()
         }
     }
 
@@ -46,10 +52,20 @@ struct SwapBasketView: View {
             Text("My Swap Basket")
                 .font(.largeTitle)
                 .bold()
+
             Spacer()
+
+            Button(action: { navigateToAddGift = true }) {
+                Image(systemName: "plus")
+                    .font(.title)
+                    .frame(width: 40, height: 40)
+                    .background(Color("App_Primary").opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
         }
         .padding(.vertical)
     }
+
 
     private var searchBar: some View {
         HStack {
@@ -59,12 +75,16 @@ struct SwapBasketView: View {
             TextField("Search gifts...", text: $viewModel.searchText, prompt: Text("Search gifts...")
                 .fontWeight(.medium)
                 .foregroundColor(.black.opacity(0.5)))
+                .onChange(of: viewModel.searchText) { _, _ in
+                    viewModel.filterGifts()
+                }
         }
         .padding(10)
         .background(Color("App_Primary").opacity(0.06))
         .cornerRadius(10)
         .padding(.bottom, 20)
     }
+
 
     private var giftList: some View {
         ScrollView {
@@ -89,7 +109,7 @@ struct SwapBasketView: View {
             }
 
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2), spacing: 12) {
-                ForEach(gifts) { gift in
+                ForEach(expandedCategories.contains(category) ? gifts : Array(gifts.prefix(4))) { gift in
                     NavigationLink(destination: SwapGiftDetailView(gift: gift, viewModel: viewModel)) {
                         SwapBasketGiftCard(gift: gift, onRemove: {
                             giftToRemove = gift
@@ -98,8 +118,23 @@ struct SwapBasketView: View {
                     }
                 }
             }
+
+            if gifts.count > 4 {
+                Button(action: {
+                    if expandedCategories.contains(category) {
+                        expandedCategories.remove(category) // Collapse category
+                    } else {
+                        expandedCategories.insert(category) // Expand category
+                    }
+                }) {
+                    Text(expandedCategories.contains(category) ? "View Less" : "Load More")
+                        .font(.body)
+                        .foregroundColor(Color.blue).frame(maxWidth: .infinity, alignment: .center)
+                }
+            }
         }
     }
+
 
     // MARK: - Confirmation Dialog
 

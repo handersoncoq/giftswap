@@ -33,6 +33,13 @@ class SwapBasketService {
             .eraseToAnyPublisher()
     }
     
+    // TEMPORARY: add gift to swap basket
+    
+    func addGiftToSwapBasket(_ swapBasketItem: SwapBasket) {
+        swapBaskets.append(swapBasketItem)
+    }
+
+    
     // Remove a gift from the swap basket
         func removeGiftFromSwapBasket(giftId: UUID) -> AnyPublisher<Bool, Error> {
             if let index = swapBaskets.firstIndex(where: { $0.giftId == giftId }) {

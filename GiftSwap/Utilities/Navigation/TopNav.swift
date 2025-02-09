@@ -61,18 +61,20 @@ struct TopNav: View {
     }
 
     private var homeButton: some View {
-        NavigationLink(
-            destination: HomeView()
-                .navigationBarBackButtonHidden(true),
-            label: {
-                Image(systemName: "house")
-                    .foregroundColor(.primary)
-            }
-        )
-        .simultaneousGesture(TapGesture().onEnded {
-            navManager.popToRoot()
-        })
-    }
+            NavigationLink(
+                destination: HomeView()
+                    .navigationBarBackButtonHidden(true),
+                label: {
+                    Image(systemName: "house")
+                        .foregroundColor(.primary)
+                }
+            )
+            .simultaneousGesture(TapGesture().onEnded {
+                navManager.popToRoot()
+            })
+        }
+
+
 
     private var notificationButton: some View {
         Button(action: { print("Notifications") }) {
