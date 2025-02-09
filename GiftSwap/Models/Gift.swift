@@ -17,7 +17,7 @@ enum SwapStatus: String, Codable {
     case matched
     case swapped
     case notListed
-    case personalUse
+    case pending
 }
 
 

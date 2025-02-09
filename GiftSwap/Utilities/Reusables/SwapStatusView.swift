@@ -32,8 +32,8 @@ struct SwapStatusView: View {
             return "Already Swapped"
         case .notListed:
             return "Not Listed for Swap"
-        case .personalUse:
-            return "For Personal Use"
+        case .pending:
+            return "Swap Pendding"
         }
     }
 
@@ -58,8 +58,8 @@ struct SwapStatusView: View {
         case .notListed:
             iconName = "eye.slash.fill"
             iconColor = .orange
-        case .personalUse:
-            iconName = "person.fill"
+        case .pending:
+            iconName = "circle.dotted"
             iconColor = .purple
         }
 

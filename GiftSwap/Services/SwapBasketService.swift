@@ -22,7 +22,7 @@ class SwapBasketService {
             .eraseToAnyPublisher()
     }
 
-    // ✅ Fetch all gifts currently in swap baskets using `GiftService`
+    // Fetch all gifts currently in swap baskets using `GiftService`
     func fetchAllGiftsInSwapBaskets() -> AnyPublisher<[Gift], Error> {
         let giftIdsInSwapBaskets = swapBaskets.map { $0.giftId }
 
