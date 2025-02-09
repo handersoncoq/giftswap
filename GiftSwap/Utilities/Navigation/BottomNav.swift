@@ -8,29 +8,31 @@
 import SwiftUI
 
 struct BottomNav: View {
+    @State private var navigateToSwapBasket = false
+
     var body: some View {
         VStack(spacing: 0) {
             ZStack {
-                
                 BottomNavBackgroundShape()
                     .fill(Color("App_Neutral").opacity(0.95))
                     .frame(height: 80)
                     .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: -6)
-                
-                
+
                 HStack {
-                    NavItem(icon: "basket", label: "My Basket"){ print("My Basket")}
-                    NavItem(icon: "waveform.path.ecg", label: "History"){ print("History")}
-                    
+                    NavItem(icon: "basket", label: "My Basket") {
+                        navigateToSwapBasket = true // ✅ Trigger navigation
+                    }
+                    NavItem(icon: "waveform.path.ecg", label: "History") {
+                        print("History")
+                    }
+
                     ZStack {
                         Circle()
                             .frame(width: 72, height: 72)
                             .foregroundColor(Color("App_Primary"))
                             .shadow(radius: 6, x: 0, y: 5)
-                        
-                        Button(action: {
-                            print("Swap Gift")
-                        }) {
+
+                        Button(action: { print("Swap Gift") }) {
                             Image(systemName: "arrow.2.circlepath")
                                 .font(.system(size: 32, weight: .bold))
                                 .foregroundColor(.white)
@@ -40,16 +42,24 @@ struct BottomNav: View {
                         }
                     }
                     .offset(y: -12)
-                    
-                    NavItem(icon: "heart", label: "Wishlist"){ print("Wishlist")}
-                    NavItem(icon: "person.2", label: "Friends"){ print("Friends")}
+
+                    NavItem(icon: "heart", label: "Wishlist") {
+                        print("Wishlist")
+                    }
+                    NavItem(icon: "person.2", label: "Friends") {
+                        print("Friends")
+                    }
                 }
                 .padding(.horizontal, 10)
                 .background(Color("App_Neutral").opacity(0.95))
             }
         }
+        .navigationDestination(isPresented: $navigateToSwapBasket) {
+            SwapBasketView()
+        }
     }
 }
+
 
 
 

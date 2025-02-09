@@ -32,5 +32,19 @@ class SwapBasketService {
             }
             .eraseToAnyPublisher()
     }
+    
+    // Remove a gift from the swap basket
+        func removeGiftFromSwapBasket(giftId: UUID) -> AnyPublisher<Bool, Error> {
+            if let index = swapBaskets.firstIndex(where: { $0.giftId == giftId }) {
+                swapBaskets.remove(at: index)
+                return Just(true)
+                    .delay(for: .seconds(1), scheduler: RunLoop.main)
+                    .setFailureType(to: Error.self)
+                    .eraseToAnyPublisher()
+            } else {
+                return Fail(error: NSError(domain: "SwapBasketService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Gift not found in Swap Basket"]))
+                    .eraseToAnyPublisher()
+            }
+        }
 }
 

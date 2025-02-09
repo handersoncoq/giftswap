@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum GiftCategory: String, Codable {
+enum GiftCategory: String, Codable, CaseIterable {
     case electronics, fashion, books, home, beauty, toys, other
 }
 

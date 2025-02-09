@@ -9,12 +9,7 @@ import SwiftUI
 import Combine
 
 struct SwapBasketView: View {
-    @State private var giftsByCategory: [GiftCategory: [Gift]] = [:]
-    @State private var filteredGiftsByCategory: [GiftCategory: [Gift]] = [:]
-    @State private var expandedCategories: Set<GiftCategory> = []
-    @State private var searchText: String = ""
-    @State private var cancellables = Set<AnyCancellable>()
-
+    @StateObject private var viewModel = SwapBasketViewModel()
     @State private var showConfirmation = false
     @State private var giftToRemove: Gift?
     @State private var showAlert = false
@@ -23,73 +18,37 @@ struct SwapBasketView: View {
     var body: some View {
         MainLayoutView(isRootView: false) {
             VStack(alignment: .leading) {
-                HStack {
-                    Text("My Swap Basket")
-                        .font(.largeTitle)
-                        .bold()
-                    Spacer()
-                }
-                .padding(.vertical)
-
+                titleView
                 searchBar
-
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        ForEach(filteredGiftsByCategory.keys.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { category in
-                            if let gifts = filteredGiftsByCategory[category] {
-                                VStack(alignment: .leading, spacing: 10) {
-                                    HStack {
-                                        Text(category.rawValue.capitalized)
-                                            .font(.headline)
-                                            .bold()
-                                        Spacer()
-                                    }
-
-                                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2), spacing: 12) {
-                                        ForEach(expandedCategories.contains(category) ? gifts : Array(gifts.prefix(4))) { gift in
-                                            SwapBasketGiftCard(gift: gift, onRemove: {
-                                                giftToRemove = gift
-                                                showConfirmation = true
-                                            })
-                                            .onTapGesture {
-                                                navigateToSwapGiftDetail(gift)
-                                            }
-                                        }
-                                    }
-
-                                    if gifts.count > 4 && !expandedCategories.contains(category) {
-                                        Button(action: {
-                                            expandedCategories.insert(category)
-                                        }) {
-                                            Text("Load More")
-                                                .font(.body)
-                                                .foregroundColor(Color("App_Primary"))
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    .padding(.bottom, 50)
-                }
-
+                giftList
                 Spacer()
             }
             .padding(.horizontal)
             .navigationBarBackButtonHidden(true)
-            .onAppear(perform: loadSwapBasket)
             .alert(alertMessage, isPresented: $showAlert) {
                 Button("OK", role: .cancel) { }
             }
-            .confirmationDialog("Are you sure you want to remove \(giftToRemove?.name ?? "this gift")?", isPresented: $showConfirmation, titleVisibility: .visible) {
-                Button("Remove", role: .destructive) {
-                    if let gift = giftToRemove {
-                        removeGiftFromSwapBasket(gift)
-                    }
-                }
-                Button("Cancel", role: .cancel) { }
+            .confirmationDialog(
+                confirmationMessage,
+                isPresented: $showConfirmation,
+                titleVisibility: .visible
+            ) {
+                removeGiftButton
+                cancelButton
             }
         }
+    }
+
+    // MARK: - Subviews
+
+    private var titleView: some View {
+        HStack {
+            Text("My Swap Basket")
+                .font(.largeTitle)
+                .bold()
+            Spacer()
+        }
+        .padding(.vertical)
     }
 
     private var searchBar: some View {
@@ -97,12 +56,9 @@ struct SwapBasketView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.black.opacity(0.5))
 
-            TextField("Search gifts...", text: $searchText, prompt: Text("Search gifts...")
+            TextField("Search gifts...", text: $viewModel.searchText, prompt: Text("Search gifts...")
                 .fontWeight(.medium)
                 .foregroundColor(.black.opacity(0.5)))
-                .onChange(of: searchText) { _, _ in
-                    filterGifts()
-                }
         }
         .padding(10)
         .background(Color("App_Primary").opacity(0.06))
@@ -110,39 +66,59 @@ struct SwapBasketView: View {
         .padding(.bottom, 20)
     }
 
-    private func loadSwapBasket() {
-        SwapBasketService.shared.fetchAllGiftsInSwapBaskets()
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { completion in
-                if case .failure(let error) = completion {
-                    print("Error fetching swap basket gifts: \(error.localizedDescription)")
+    private var giftList: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                ForEach(viewModel.giftsByCategory.keys.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { category in
+                    if let gifts = viewModel.giftsByCategory[category] {
+                        categorySection(category: category, gifts: gifts)
+                    }
                 }
-            }, receiveValue: { fetchedGifts in
-                self.giftsByCategory = Dictionary(grouping: fetchedGifts, by: { $0.category })
-                self.filterGifts()
-            })
-            .store(in: &cancellables)
-    }
-
-    private func filterGifts() {
-        if searchText.isEmpty {
-            filteredGiftsByCategory = giftsByCategory
-        } else {
-            filteredGiftsByCategory = giftsByCategory.mapValues { gifts in
-                gifts.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
-            }.filter { !$0.value.isEmpty }
+            }
+            .padding(.bottom, 50)
         }
     }
 
-    private func removeGiftFromSwapBasket(_ gift: Gift) {
-        giftsByCategory[gift.category]?.removeAll { $0.id == gift.id }
-        filterGifts()
-        alertMessage = "Gift \"\(gift.name)\" has been removed from your swap basket."
-        showAlert = true
+    private func categorySection(category: GiftCategory, gifts: [Gift]) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(category.rawValue.capitalized)
+                    .font(.headline)
+                    .bold()
+                Spacer()
+            }
+
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2), spacing: 12) {
+                ForEach(gifts) { gift in
+                    NavigationLink(destination: SwapGiftDetailView(gift: gift, viewModel: viewModel)) {
+                        SwapBasketGiftCard(gift: gift, onRemove: {
+                            giftToRemove = gift
+                            showConfirmation = true
+                        })
+                    }
+                }
+            }
+        }
     }
 
-    private func navigateToSwapGiftDetail(_ gift: Gift) {
-        print("Navigating to details for \(gift.name)")
+    // MARK: - Confirmation Dialog
+
+    private var confirmationMessage: String {
+        "Are you sure you want to remove \(giftToRemove?.name ?? "") from your basket?"
+    }
+
+    private var removeGiftButton: some View {
+        Button("Remove", role: .destructive) {
+            if let gift = giftToRemove {
+                viewModel.removeGift(gift)
+                alertMessage = "Gift \"\(gift.name)\" has been removed from your swap basket."
+                showAlert = true
+            }
+        }
+    }
+
+    private var cancelButton: some View {
+        Button("Cancel", role: .cancel) { }
     }
 }
 

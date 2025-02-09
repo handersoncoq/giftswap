@@ -47,20 +47,20 @@ struct SwapStatusView: View {
             iconName = "arrow.2.circlepath"
             iconColor = Color("App_Primary")
         case .inBasket:
-            iconName = "tray.full"
-            iconColor = .yellow
+            iconName = "basket"
+            iconColor = Color("App_Primary")
         case .matched:
             iconName = "hand.raised.fill"
             iconColor = .blue
         case .swapped:
             iconName = "checkmark.circle.fill"
-            iconColor = .gray
+            iconColor = .green
         case .notListed:
             iconName = "eye.slash.fill"
-            iconColor = .orange
+            iconColor = .gray
         case .pending:
             iconName = "circle.dotted"
-            iconColor = .purple
+            iconColor = .orange
         }
 
         return Image(systemName: iconName)

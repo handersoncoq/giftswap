@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct HomeView: View {
+    @State private var navigateToAddGift = false
     var body: some View {
         MainLayoutView(isRootView: true) {
             ZStack {
-                
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
                         
@@ -33,9 +33,28 @@ struct HomeView: View {
                     .padding(.vertical, 18)
                     .ignoresSafeArea()
                 }
+            }.navigationDestination(isPresented: $navigateToAddGift) {
+                AddGiftView()
             }
         }.navigationBarBackButtonHidden(true)
     }
+    
+    private var ctaButtonSection: some View {
+            VStack {
+                Text("Got a gift that’s not quite right? Add it to your basket, and we’ll find the perfect swap for you!")
+                    .font(.body)
+                    .padding(.horizontal)
+
+                CTAButton(
+                    label: "Add Gifts to Your Swap Basket Now!",
+                    backgroundColor: Color("App_Primary"),
+                    action: { navigateToAddGift = true },
+                    icon: Image(systemName: "basket")
+                )
+                .padding(.horizontal)
+            }
+        }
+
         
 }
 
@@ -59,23 +78,6 @@ private var headerSection: some View {
     .padding(.vertical)
 }
 
-private var ctaButtonSection: some View {
-    VStack {
-        Text("Got a gift that’s not quite right? Add it to your basket, and we’ll find the perfect swap for you!")
-            .font(.body)
-            .padding(.horizontal)
-        
-        CTAButton(
-            label: "Add Gifts to Your Swap Basket Now!",
-            backgroundColor: Color("App_Primary"),
-            action: {
-                print("Add Gift!")
-            },
-            icon: Image(systemName: "basket")
-        )
-        .padding(.horizontal)
-    }
-}
 
 private var dividerSection: some View {
     HStack {

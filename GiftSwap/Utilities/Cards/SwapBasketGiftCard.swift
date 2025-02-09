@@ -67,7 +67,7 @@ struct SwapBasketGiftCard: View {
                     // Remove button (only if status is not "pending")
                     if gift.swapStatus != .pending {
                         Button(action: onRemove) {
-                            Image(systemName: "minus.circle.fill")
+                            Image(systemName: "trash")
                                 .resizable()
                                 .frame(width: 24, height: 24)
                                 .foregroundColor(.red)
