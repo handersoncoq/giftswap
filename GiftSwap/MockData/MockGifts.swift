@@ -18,7 +18,7 @@ struct MockGifts {
             storeLink: "https://www.bulgari.com/en-us/watches/mens/octo-finissimo-watch-brown-gold",
             category: .fashion,
             ownerId: MockUsers.users[0].id,
-            swapStatus: .pending,
+            swapStatus: .available,
             addedAt: Date()
         ),
         Gift(

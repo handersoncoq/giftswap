@@ -7,20 +7,6 @@
 
 import Foundation
 
-enum GiftCategory: String, Codable, CaseIterable {
-    case electronics, fashion, books, home, beauty, toys, other
-}
-
-enum SwapStatus: String, Codable {
-    case available
-    case inBasket
-    case matched
-    case swapped
-    case notListed
-    case pending
-}
-
-
 struct Gift: Identifiable, Codable {
     var id: UUID
     var name: String

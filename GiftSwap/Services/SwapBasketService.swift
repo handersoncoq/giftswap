@@ -38,6 +38,13 @@ class SwapBasketService {
     func addGiftToSwapBasket(_ swapBasketItem: SwapBasket) {
         swapBaskets.append(swapBasketItem)
     }
+    
+    func updateSwapStatus(for giftId: UUID, to newStatus: SwapStatus) {
+        if let index = swapBaskets.firstIndex(where: { $0.id == giftId }) {
+            swapBaskets[index].status = newStatus
+        }
+    }
+
 
     
     // Remove a gift from the swap basket

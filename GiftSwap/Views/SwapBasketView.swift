@@ -87,7 +87,7 @@ struct SwapBasketView: View {
 
 
     private var giftList: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
                 ForEach(viewModel.giftsByCategory.keys.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { category in
                     if let gifts = viewModel.giftsByCategory[category] {
@@ -139,7 +139,7 @@ struct SwapBasketView: View {
     // MARK: - Confirmation Dialog
 
     private var confirmationMessage: String {
-        "Are you sure you want to remove \(giftToRemove?.name ?? "") from your basket?"
+        "Are you sure you want to remove \(giftToRemove?.name ?? "") from your swap basket?"
     }
 
     private var removeGiftButton: some View {

@@ -53,11 +53,11 @@ struct CategoryMarketplaceView: View {
         .background(Color("App_Primary").opacity(0.06))
         .cornerRadius(10)
         .padding(.horizontal)
-        .padding(.bottom, 20)
+        .padding(.bottom, 10)
     }
 
     private var giftsGrid: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             LazyVGrid(columns: columns, spacing: 18) {
                 ForEach(paginatedGifts) { gift in
                     NavigationLink(destination: GiftDetailView(gift: gift)) {
@@ -65,6 +65,7 @@ struct CategoryMarketplaceView: View {
                     }
                 }
             }
+            .padding(.top, 10)
             .padding(.horizontal)
 
             if viewModel.filteredGifts.count > itemsPerPage {

@@ -9,6 +9,8 @@ import SwiftUI
 
 struct BottomNav: View {
     @State private var navigateToSwapBasket = false
+    @State private var showGiftMatching = false
+    @State private var isAnimating = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -20,28 +22,13 @@ struct BottomNav: View {
 
                 HStack {
                     NavItem(icon: "basket", label: "My Basket") {
-                        navigateToSwapBasket = true // ✅ Trigger navigation
+                        navigateToSwapBasket = true
                     }
                     NavItem(icon: "waveform.path.ecg", label: "History") {
                         print("History")
                     }
 
-                    ZStack {
-                        Circle()
-                            .frame(width: 72, height: 72)
-                            .foregroundColor(Color("App_Primary"))
-                            .shadow(radius: 6, x: 0, y: 5)
-
-                        Button(action: { print("Swap Gift") }) {
-                            Image(systemName: "arrow.2.circlepath")
-                                .font(.system(size: 32, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 60, height: 60)
-                                .background(Color("App_Primary"))
-                                .clipShape(Circle())
-                        }
-                    }
-                    .offset(y: -12)
+                    swapButton
 
                     NavItem(icon: "heart", label: "Wishlist") {
                         print("Wishlist")
@@ -57,8 +44,39 @@ struct BottomNav: View {
         .navigationDestination(isPresented: $navigateToSwapBasket) {
             SwapBasketView()
         }
+        .sheet(isPresented: $showGiftMatching) {
+            GiftMatchingView(isPresented: $showGiftMatching)
+        }
+    }
+
+    private var swapButton: some View {
+        ZStack {
+            Circle()
+                .frame(width: 72, height: 72)
+                .foregroundColor(Color("App_Primary"))
+                .shadow(radius: 6, x: 0, y: 5)
+
+            Button(action: {
+                isAnimating = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    isAnimating = false
+                    showGiftMatching = true
+                }
+            }) {
+                Image(systemName: "arrow.2.circlepath")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundColor(.white)
+                    .rotationEffect(.degrees(isAnimating ? 360 : 0)) // Animation
+                    .animation(.easeInOut(duration: 0.6), value: isAnimating)
+                    .frame(width: 60, height: 60)
+                    .background(Color("App_Primary"))
+                    .clipShape(Circle())
+            }
+        }
+        .offset(y: -12)
     }
 }
+
 
 
 

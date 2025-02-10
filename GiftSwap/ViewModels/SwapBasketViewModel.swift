@@ -12,6 +12,7 @@ class SwapBasketViewModel: ObservableObject {
     @Published var giftsByCategory: [GiftCategory: [Gift]] = [:]
     private var allGiftsByCategory: [GiftCategory: [Gift]] = [:]
     @Published var searchText: String = ""
+    @Published var pendingSwapRequests: [Gift] = []
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -27,8 +28,8 @@ class SwapBasketViewModel: ObservableObject {
                     print("Error fetching swap basket gifts: \(error.localizedDescription)")
                 }
             }, receiveValue: { fetchedGifts in
-                self.allGiftsByCategory = Dictionary(grouping: fetchedGifts, by: { $0.category }) // ✅ Store unfiltered
-                self.filterGifts() // ✅ Apply filtering logic immediately
+                self.allGiftsByCategory = Dictionary(grouping: fetchedGifts, by: { $0.category })
+                self.filterGifts()
             })
             .store(in: &cancellables)
     }

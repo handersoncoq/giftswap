@@ -127,7 +127,7 @@ private var partnerSection: some View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                        .foregroundColor(Color("App_Primary"))
+                        .foregroundColor(Color.blue)
                         .padding(20)
                     
                 }}

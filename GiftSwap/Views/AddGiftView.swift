@@ -25,7 +25,7 @@ struct AddGiftView: View {
                        .padding()
                        .padding(.bottom, 20)
 
-                   ScrollView {
+                   ScrollView(showsIndicators: false) {
                        VStack(spacing: 20) {
                            giftImagesPicker
                            giftInfoFields
