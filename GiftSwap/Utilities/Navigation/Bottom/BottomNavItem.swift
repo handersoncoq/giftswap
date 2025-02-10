@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct NavItem: View {
+struct BottomNavItem: View {
     let icon: String
     let label: String
     let action: () -> Void

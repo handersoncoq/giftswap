@@ -24,14 +24,8 @@ struct SwapStatusView: View {
         switch status {
         case .available:
             return "Swappable"
-        case .inBasket:
-            return "In Swap Basket"
-        case .matched:
-            return "Reserved for Swap"
         case .swapped:
-            return "Already Swapped"
-        case .notListed:
-            return "Not Listed for Swap"
+            return "Swapped"
         case .pending:
             return "Swap Pendding"
         }
@@ -46,21 +40,12 @@ struct SwapStatusView: View {
         case .available:
             iconName = "arrow.2.circlepath"
             iconColor = Color("App_Primary")
-        case .inBasket:
-            iconName = "basket"
-            iconColor = Color("App_Primary")
-        case .matched:
-            iconName = "hand.raised.fill"
-            iconColor = .blue
-        case .swapped:
-            iconName = "checkmark.circle.fill"
-            iconColor = .green
-        case .notListed:
-            iconName = "eye.slash.fill"
-            iconColor = .gray
         case .pending:
             iconName = "circle.dotted"
             iconColor = .orange
+        case .swapped:
+            iconName = "checkmark.circle.fill"
+            iconColor = .green
         }
 
         return Image(systemName: iconName)

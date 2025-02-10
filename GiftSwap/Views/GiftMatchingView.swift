@@ -119,7 +119,7 @@ struct GiftMatchingView: View {
     
     private func noMatchView() -> some View {
         VStack {
-            Text("Sorry, no matches found at this time.")
+            Text("Sorry, no match found at this time.")
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -173,3 +173,7 @@ struct DotsLoadingAnimation: View {
         }
     }
 }
+
+// #Preview {
+//    GiftMatchingView(isPresented: .constant(true))
+//}

@@ -32,6 +32,21 @@ class UserService {
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
+    
+    // Fetch user by email and password
+    func fetchUserByEmailAndPassword(email: String, password: String) -> AnyPublisher<User?, Error> {
+        let normalizedEmail = email.lowercased()
+
+        let user = users.first {
+            $0.email.lowercased() == normalizedEmail && $0.password == password
+        }
+
+        return Just(user)
+            .delay(for: .seconds(1), scheduler: RunLoop.main)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
 
     // Add user (mock persistence)
     func addUser(_ user: User) -> AnyPublisher<User, Error> {

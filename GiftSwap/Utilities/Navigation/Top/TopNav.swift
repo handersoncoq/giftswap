@@ -12,6 +12,7 @@ struct TopNav: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.horizontalSizeClass) var sizeClass
     @ObservedObject var navManager: NavigationManager
+    @ObservedObject var authService = AuthService.shared
 
     var body: some View {
         VStack {
@@ -33,48 +34,44 @@ struct TopNav: View {
             .padding(.bottom, 15)
         }
     }
-
+    
     private var backButton: some View {
-        Group {
-            if sizeClass == .compact {
-                Button(action: { dismiss() }) {
-                    HStack {
-                        Image(systemName: "arrow.left")
-                        Text("Back")
+            Group {
+                if sizeClass == .compact {
+                    Button(action: { dismiss() }) {
+                        HStack {
+                            Image(systemName: "arrow.left")
+                            Text("Back")
+                        }
+                        .foregroundColor(.blue)
                     }
-                    .foregroundColor(.blue)
                 }
             }
         }
-    }
 
     private var navigationButtons: some View {
         HStack(spacing: 16) {
             if !isRootView {
                 homeButton
             }
-
             notificationButton
-
             menuButton
         }
     }
 
     private var homeButton: some View {
-            NavigationLink(
-                destination: HomeView()
-                    .navigationBarBackButtonHidden(true),
-                label: {
-                    Image(systemName: "house")
-                        .foregroundColor(.primary)
-                }
-            )
-            .simultaneousGesture(TapGesture().onEnded {
-                navManager.popToRoot()
-            })
-        }
-
-
+        NavigationLink(
+            destination: HomeView()
+                .navigationBarBackButtonHidden(true),
+            label: {
+                Image(systemName: "house")
+                    .foregroundColor(.primary)
+            }
+        )
+        .simultaneousGesture(TapGesture().onEnded {
+            navManager.popToRoot()
+        })
+    }
 
     private var notificationButton: some View {
         Button(action: { print("Notifications") }) {
@@ -84,12 +81,17 @@ struct TopNav: View {
     }
 
     private var menuButton: some View {
-        Button(action: { print("Menu") }) {
-            Image(systemName: "line.3.horizontal.decrease")
-                .foregroundColor(.primary)
-        }
+        MenuView()
     }
+
 }
+
+
+#Preview {
+    TopNav(isRootView: true, navManager: NavigationManager())
+}
+
+
 
 
 

@@ -28,11 +28,17 @@ class SwapBasketViewModel: ObservableObject {
                     print("Error fetching swap basket gifts: \(error.localizedDescription)")
                 }
             }, receiveValue: { fetchedGifts in
-                self.allGiftsByCategory = Dictionary(grouping: fetchedGifts, by: { $0.category })
+                // Keep only gifts that are available for swapping
+                let marketplaceGifts = fetchedGifts.filter { $0.swapStatus == .available }
+
+                // Group them by category
+                self.allGiftsByCategory = Dictionary(grouping: marketplaceGifts, by: { $0.category })
+                
                 self.filterGifts()
             })
             .store(in: &cancellables)
     }
+
 
     func removeGift(_ gift: Gift) {
         SwapBasketService.shared.removeGiftFromSwapBasket(giftId: gift.id)

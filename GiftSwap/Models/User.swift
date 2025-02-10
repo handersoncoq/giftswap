@@ -11,6 +11,7 @@ struct User: Identifiable, Codable {
     var id: UUID
     var name: String
     var email: String
+    var password: String
     var profilePictureURL: String?
     var rating: Double
     var location: String?
@@ -25,6 +26,7 @@ struct User: Identifiable, Codable {
         id: UUID = UUID(),
         name: String,
         email: String,
+        password: String,
         profilePictureURL: String? = nil,
         rating: Double = 5.0,
         location: String? = nil,
@@ -45,6 +47,7 @@ struct User: Identifiable, Codable {
         self.wishlists = wishlists
         self.swapBasket = swapBasket
         self.purchaseHistory = purchaseHistory
+        self.password = password
     }
 }
 

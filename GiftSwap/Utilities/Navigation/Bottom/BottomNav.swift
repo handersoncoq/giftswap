@@ -21,19 +21,19 @@ struct BottomNav: View {
                     .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: -6)
 
                 HStack {
-                    NavItem(icon: "basket", label: "My Basket") {
+                    BottomNavItem(icon: "basket", label: "My Basket") {
                         navigateToSwapBasket = true
                     }
-                    NavItem(icon: "waveform.path.ecg", label: "History") {
+                    BottomNavItem(icon: "waveform.path.ecg", label: "History") {
                         print("History")
                     }
 
                     swapButton
 
-                    NavItem(icon: "heart", label: "Wishlist") {
+                    BottomNavItem(icon: "heart", label: "Wishlist") {
                         print("Wishlist")
                     }
-                    NavItem(icon: "person.2", label: "Friends") {
+                    BottomNavItem(icon: "person.2", label: "Friends") {
                         print("Friends")
                     }
                 }

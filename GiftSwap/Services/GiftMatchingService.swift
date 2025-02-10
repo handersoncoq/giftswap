@@ -14,7 +14,7 @@ class GiftMatchingService {
 
     private var cancellables = Set<AnyCancellable>()
 
-    /// Finds a match for a given gift in the swap basket
+    // Finds a match for a given gift in the swap basket
     func findMatch(for gift: Gift, userId: UUID) -> AnyPublisher<Gift?, Error> {
         return Future<Gift?, Error> { promise in
             // Step 1: Fetch ALL wishlists for this user
@@ -51,7 +51,7 @@ class GiftMatchingService {
         .eraseToAnyPublisher()
     }
 
-    /// Finds a matching gift based on multiple criteria
+    // Finds a matching gift based on multiple criteria
     private func findMatchingGift(gift: Gift, wishlistGifts: [Gift], swapGifts: [Gift]) -> Gift? {
         // Exact Name Match
         if let match = wishlistGifts.first(where: { $0.name.lowercased() == gift.name.lowercased() }) {
@@ -84,7 +84,7 @@ class GiftMatchingService {
         return nil // No match found
     }
 
-    /// Basic text similarity check (Temporary - Will Be Replaced by AI)
+    // Basic text similarity check (Temporary - Will Be Replaced by AI)
     private func isDescriptionSimilar(_ desc1: String, _ desc2: String) -> Bool {
         let words1 = Set(desc1.lowercased().split(separator: " "))
         let words2 = Set(desc2.lowercased().split(separator: " "))

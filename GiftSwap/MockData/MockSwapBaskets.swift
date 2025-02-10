@@ -9,6 +9,6 @@ import Foundation
 
 struct MockSwapBaskets {
     static let swapBaskets: [SwapBasket] = MockGifts.gifts.map { gift in
-        SwapBasket(userId: UUID(), giftId: gift.id, status: .inBasket)
+        SwapBasket(userId: UUID(), giftId: gift.id, status: .available)
     }
 }

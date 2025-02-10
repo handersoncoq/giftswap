@@ -13,6 +13,7 @@ struct AppTextField: View {
     var keyboardType: UIKeyboardType = .default
     var characterLimit: Int? = nil
     var isMultiline: Bool = false
+    var isSecure: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
@@ -27,11 +28,11 @@ struct AppTextField: View {
                     TextEditor(text: $text)
                         .frame(minHeight: 100, maxHeight: 200)
                         .padding(10)
-                        .background(Color("App_Primary").opacity(0.06))
+                        .background(Color("Primary_Neutral").opacity(0.06))
                         .cornerRadius(10)
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color("App_Primary").opacity(0.06), lineWidth: 1)
+                                .stroke(Color("Primary_Neutral").opacity(0.06), lineWidth: 1)
                         )
                         .foregroundColor(.primary)
                         .scrollContentBackground(.hidden)
@@ -41,24 +42,39 @@ struct AppTextField: View {
                             }
                         }
                 } else {
-                    TextField(placeholder, text: $text, prompt: Text(placeholder)
-                        .fontWeight(.medium)
-                        .foregroundColor(.black.opacity(0.5)))
-                        .keyboardType(keyboardType)
-                        .padding(10)
-                        .background(Color("App_Primary").opacity(0.06))
-                        .cornerRadius(10)
-                        .onChange(of: text) { _, newValue in
-                            if let limit = characterLimit, newValue.count > limit {
-                                text = String(newValue.prefix(limit))
+                    if isSecure {
+                        SecureField(placeholder, text: $text)
+                            .padding(10)
+                            .background(Color("Primary_Neutral").opacity(0.06))
+                            .cornerRadius(10)
+                            .autocapitalization(.none)
+                            .onChange(of: text) { _, newValue in
+                                if let limit = characterLimit, newValue.count > limit {
+                                    text = String(newValue.prefix(limit))
+                                }
                             }
-                        }
+                    } else {
+                        TextField(placeholder, text: $text, prompt: Text(placeholder)
+                            .fontWeight(.medium)
+                            .foregroundColor(.black.opacity(0.5)))
+                            .keyboardType(keyboardType)
+                            .autocapitalization(.none)
+                            .padding(10)
+                            .background(Color("Primary_Neutral").opacity(0.06))
+                            .cornerRadius(10)
+                            .onChange(of: text) { _, newValue in
+                                if let limit = characterLimit, newValue.count > limit {
+                                    text = String(newValue.prefix(limit))
+                                }
+                            }
+                    }
                 }
             }
         }
         .padding(.bottom, 20)
     }
 }
+
 
 
 

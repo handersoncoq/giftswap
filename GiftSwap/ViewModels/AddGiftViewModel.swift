@@ -69,7 +69,7 @@ class AddGiftViewModel: ObservableObject {
             storeLink: storeLink.isEmpty ? nil : storeLink,
             category: selectedCategory,
             ownerId: UUID(),
-            swapStatus: .inBasket,
+            swapStatus: .available,
             addedAt: Date()
         )
 
@@ -80,7 +80,7 @@ class AddGiftViewModel: ObservableObject {
         let newSwapBasketItem = SwapBasket(
             userId: newGift.ownerId,
             giftId: newGift.id,
-            status: .inBasket
+            status: .available
         )
         
         // add it to SwapBasketService

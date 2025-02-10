@@ -9,14 +9,20 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject var navManager = NavigationManager()
-    @State private var showHomeView = false
+    @AppStorage("isAuthenticated") private var isAuthenticated: Bool = false
+    @State private var showMainView = false
 
     var body: some View {
         Group {
-            if showHomeView {
-                HomeView()
-                    .transition(.opacity)
-                    .environmentObject(navManager)
+            if showMainView {
+                if isAuthenticated {
+                    HomeView()
+                        .transition(.opacity)
+                        .environmentObject(navManager)
+                } else {
+                    LoginView()
+                        .transition(.opacity)
+                }
             } else {
                 splashScreenView
             }
@@ -25,7 +31,7 @@ struct ContentView: View {
         .background(Color("App_Primary"))
         .ignoresSafeArea()
         .onAppear {
-            scheduleHomeViewTransition()
+            scheduleMainViewTransition()
         }
     }
 
@@ -40,15 +46,18 @@ struct ContentView: View {
         .transition(.opacity)
     }
 
-    private func scheduleHomeViewTransition() {
+    private func scheduleMainViewTransition() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             withAnimation {
-                showHomeView = true
+                if UserDefaults.standard.bool(forKey: "isAuthenticated") {
+                    isAuthenticated = true
+                }
+                showMainView = true
             }
         }
     }
-}
 
+}
 
 
 #Preview {

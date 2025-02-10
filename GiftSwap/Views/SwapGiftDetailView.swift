@@ -186,7 +186,7 @@ struct SwapGiftDetailView_Previews: PreviewProvider {
                 storeLink: "https://store.com/luxury-watch",
                 category: .fashion,
                 ownerId: UUID(),
-                swapStatus: .inBasket,
+                swapStatus: .available,
                 addedAt: Date()
             ), viewModel: SwapBasketViewModel())
         }
