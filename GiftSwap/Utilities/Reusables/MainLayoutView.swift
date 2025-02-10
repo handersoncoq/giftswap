@@ -10,7 +10,7 @@ import SwiftUI
 struct MainLayoutView<Content: View>: View {
     var isRootView: Bool
     let content: Content
-    @StateObject private var navigationManager = NavigationManager()
+    @StateObject private var navigationManager = NavigationManager.shared
 
     init(isRootView: Bool, @ViewBuilder content: () -> Content) {
         self.isRootView = isRootView
@@ -38,12 +38,19 @@ struct MainLayoutView<Content: View>: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
+            .navigationDestination(for: Destination.self) { destination in
+                switch destination {
+                case .home:
+                    HomeView()
+                case .settings:
+                    SettingsView()
+                case .profile:
+                    UserProfileView()
+                }
+            }
             .environmentObject(navigationManager)
         }
     }
 }
-
-
-
 
 

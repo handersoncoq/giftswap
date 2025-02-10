@@ -9,6 +9,7 @@ import SwiftUI
 
 struct MenuView: View {
     @ObservedObject var authService = AuthService.shared
+    @EnvironmentObject var navigationManager: NavigationManager
 
     var body: some View {
         Menu {
@@ -37,9 +38,5 @@ struct MenuView: View {
         .menuStyle(BorderlessButtonMenuStyle())
     }
 }
-
-
-
-
 
 

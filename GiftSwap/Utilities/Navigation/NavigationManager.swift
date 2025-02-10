@@ -8,11 +8,20 @@
 import SwiftUI
 
 class NavigationManager: ObservableObject {
-    @Published var path: [AnyHashable] = []
-
+    static let shared = NavigationManager()
+    
+    @Published var path: [Destination] = []
+    
     func popToRoot() {
         path.removeAll()
     }
+
+    func navigateTo(_ destination: Destination) {
+        DispatchQueue.main.async {
+            self.path.append(destination)
+        }
+    }
 }
+
 
 

@@ -9,7 +9,6 @@ import Foundation
 import Combine
 import SwiftUI
 
-
 class AuthService: ObservableObject {
     static let shared = AuthService()
     @Published var currentUser: User?
@@ -24,18 +23,25 @@ class AuthService: ObservableObject {
             .handleEvents(receiveOutput: { user in
                 DispatchQueue.main.async {
                     self.currentUser = user
-                    self.isAuthenticated = true
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        self.isAuthenticated = true
+                    }
                 }
             })
+            .delay(for: .seconds(0.6), scheduler: RunLoop.main)
             .eraseToAnyPublisher()
     }
 
+
+
     func logout() {
         isLoggingOut = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { 
-            self.currentUser = nil
-            self.isAuthenticated = false
-            self.isLoggingOut = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            withAnimation(.easeInOut(duration: 0.4)) {
+                self.currentUser = nil
+                self.isAuthenticated = false
+                self.isLoggingOut = false
+            }
         }
     }
 
@@ -43,5 +49,6 @@ class AuthService: ObservableObject {
         return isAuthenticated && currentUser != nil
     }
 }
+
 
 

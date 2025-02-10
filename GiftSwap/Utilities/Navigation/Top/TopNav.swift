@@ -81,7 +81,7 @@ struct TopNav: View {
     }
 
     private var menuButton: some View {
-        MenuView()
+        MenuView().environmentObject(NavigationManager())
     }
 
 }
