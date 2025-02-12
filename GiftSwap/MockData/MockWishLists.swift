@@ -11,7 +11,7 @@ struct MockWishlists {
     static let wishlists: [Wishlist] = [
         Wishlist(
             userId: MockUsers.users[0].id,
-            name: "Birthday Wishlist",
+            name: "My 25th Birthday",
             description: "Gifts I'd love to receive for my upcoming birthday!",
             isPrivate: false,
             isActive: true,
@@ -20,20 +20,11 @@ struct MockWishlists {
         ),
         Wishlist(
             userId: MockUsers.users[1].id,
-            name: "Christmas Wishlist",
+            name: "My Christmas Wishlist",
             description: "My dream Christmas gifts!",
             isPrivate: true,
             isActive: true,
             category: .christmas,
-            addedAt: Date()
-        ),
-        Wishlist(
-            userId: MockUsers.users[2].id,
-            name: "Anniversary Gift Ideas",
-            description: "Some ideas for my partner's anniversary gift.",
-            isPrivate: false,
-            isActive: true,
-            category: .anniversary,
             addedAt: Date()
         ),
         Wishlist(

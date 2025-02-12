@@ -23,31 +23,59 @@ class WishGiftFormViewModel: ObservableObject {
     @Published var category: GiftCategory = .other
     @Published var occasion: WishlistCategory = .other
     @Published var images: [String] = []
-    @Published var currency: String = ""
+    @Published var currency: String = "USD"
     @Published var brand: String = ""
     @Published var fetchedImageURLs: [String] = []
     @Published var priceString: String = ""
     @Published var selectedCategory: GiftCategory = .other
-    @Published var selectedOccasion: WishlistCategory = .other
     @Published var imageManager = GiftImageManager()
-
 
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
-    
     @Published var showError = false
-
+    @Published var giftsByCategory: [GiftCategory: [WishGift]] = [:]
     
-    @Published var price: Double? {
-            didSet {
-                priceString = price.map { String(format: "%.2f", $0) } ?? ""
-            }
-        }
+    @Published var searchText: String = ""
     
+    private var allGiftsByCategory: [GiftCategory: [WishGift]] = [:]
 
     private var cancellables = Set<AnyCancellable>()
     
+    let wishlist: Wishlist
 
+    @Published var price: Double? {
+        didSet {
+            priceString = price.map { String(format: "%.2f", $0) } ?? ""
+        }
+    }
+
+    init(wishlist: Wishlist) {
+        self.wishlist = wishlist
+        fetchWishGifts()
+    }
+
+    // MARK: - Fetch Wish Gifts for a Specific Wishlist
+    func fetchWishGifts(for wishlistId: UUID? = nil) {
+        isLoading = true
+        WishGiftService.shared.fetchWishGifts()
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                self.isLoading = false
+                if case .failure(let error) = completion {
+                    print("Error fetching wish gifts: \(error.localizedDescription)")
+                }
+            }, receiveValue: { fetchedGifts in
+                let filteredGifts = wishlistId != nil ? fetchedGifts.filter { $0.id == wishlistId } : fetchedGifts
+                
+                // Group gifts by category
+                self.allGiftsByCategory = Dictionary(grouping: filteredGifts, by: { $0.category })
+                self.filterGifts()
+            })
+            .store(in: &cancellables)
+    }
+
+
+    // MARK: - Fetch Product Details
     func fetchGiftDetails() {
         guard !storeLink.isEmpty else {
             errorMessage = "Please enter a valid product link."
@@ -77,33 +105,27 @@ class WishGiftFormViewModel: ObservableObject {
                 self.description = gift.description
                 self.images = gift.images
                 self.priceString = gift.price != nil ? String(format: "%.2f", gift.price!) : ""
-                
                 self.currency = gift.currency ?? "USD"
-                
                 self.brand = gift.brand ?? "n/a"
             })
             .store(in: &cancellables)
     }
 
-
-
-    
+    // MARK: - Add Gift to Wishlist
     func addGiftToWishlist() -> String? {
-        // Ensure required fields are filled
-        guard !name.isEmpty, !description.isEmpty, !storeLink.isEmpty else {
+        guard !name.isEmpty, !description.isEmpty else {
             return "Please fill in all required fields."
         }
-        
-        // Ensure at least one image is present
+
         let allImages = images + imageManager.saveImagesTemporarily()
         guard !allImages.isEmpty else {
             return "At least one image is required."
         }
-        
-        // Convert priceString to Double safely
+
         let priceValue = Double(priceString.trimmingCharacters(in: .whitespacesAndNewlines))
         
         let newGift = WishGift(
+            id: UUID(),
             name: name,
             description: description,
             category: selectedCategory,
@@ -112,10 +134,9 @@ class WishGiftFormViewModel: ObservableObject {
             price: priceValue,
             currency: currency,
             brand: brand,
-            occasion: selectedOccasion
-            
+            wishListId: wishlist.id
         )
-        
+
         WishGiftService.shared.addWishGift(newGift)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
@@ -126,33 +147,58 @@ class WishGiftFormViewModel: ObservableObject {
                 print("Gift added successfully: \(addedGift.name)")
             })
             .store(in: &cancellables)
-        
-        print("price is \(String(describing: newGift.price))")
-        
-        DispatchQueue.main.async {
-            self.images = self.imageManager.saveImagesTemporarily()
-        }
-        
+
         return nil
     }
 
-    
-    // TEMPORARY:
-    func saveImagesTemporarily() -> [String] {
-        return imageManager.saveImagesTemporarily()
-    }
-    
-    func removeFetchedImage(_ url: String) {
-            DispatchQueue.main.async {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    self.fetchedImageURLs.removeAll { $0 == url }
+
+    // MARK: - Remove Gift from Wishlist
+    func removeGift(_ gift: WishGift) {
+        WishGiftService.shared.deleteWishGift(id: gift.id)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    print("Error removing gift: \(error.localizedDescription)")
                 }
+            }, receiveValue: { success in
+                if success {
+                    self.giftsByCategory[gift.category]?.removeAll { $0.id == gift.id }
+                }
+            })
+            .store(in: &cancellables)
+    }
+
+    // MARK: - Filter Wish Gifts
+    func filterGifts() {
+        if searchText.isEmpty {
+            giftsByCategory = allGiftsByCategory
+        } else {
+            giftsByCategory = allGiftsByCategory.mapValues { gifts in
+                gifts.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+            }.filter { !$0.value.isEmpty }
+        }
+    }
+
+    // MARK: - Refresh Wish Gifts
+    func refreshWishGifts() {
+        isLoading = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            self.fetchWishGifts()
+            self.isLoading = false
+        }
+    }
+
+    // MARK: - Image Management
+    func removeFetchedImage(_ url: String) {
+        DispatchQueue.main.async {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                self.fetchedImageURLs.removeAll { $0 == url }
             }
         }
+    }
 
     func removeSelectedImage(_ id: UUID) {
         imageManager.removeImage(id)
     }
-
-
 }
+

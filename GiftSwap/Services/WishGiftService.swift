@@ -36,10 +36,6 @@ class WishGiftService {
             filteredGifts = filteredGifts.filter { $0.brand?.lowercased() == brand.lowercased() }
         }
         
-        if let occasion = occasion {
-            filteredGifts = filteredGifts.filter { $0.occasion.rawValue == occasion }
-        }
-        
         return Just(filteredGifts)
             .delay(for: .seconds(1), scheduler: RunLoop.main)
             .setFailureType(to: Error.self)
@@ -134,7 +130,8 @@ class WishGiftService {
                     price: price,
                     currency: "USD",
                     brand: nil,
-                    occasion: .other
+                    addedDate: Date(),
+                    wishListId: UUID()
                 )
             }
             .receive(on: DispatchQueue.main)

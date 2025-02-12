@@ -18,7 +18,7 @@ struct WishGift: Identifiable, Codable {
     var currency: String? = "USD"
     var brand: String?
     var addedDate: Date
-    var occasion: WishlistCategory
+    var wishListId: UUID?
 
     init(
         id: UUID = UUID(),
@@ -31,7 +31,7 @@ struct WishGift: Identifiable, Codable {
         currency: String? = nil,
         brand: String? = nil,
         addedDate: Date = Date(),
-        occasion: WishlistCategory
+        wishListId: UUID
     ) {
         self.id = id
         self.name = name
@@ -43,6 +43,6 @@ struct WishGift: Identifiable, Codable {
         self.currency = currency
         self.brand = brand
         self.addedDate = addedDate
-        self.occasion = occasion
+        self.wishListId = wishListId
     }
 }

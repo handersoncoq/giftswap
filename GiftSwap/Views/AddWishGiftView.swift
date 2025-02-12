@@ -11,62 +11,67 @@ import Combine
 
 struct AddWishGiftView: View {
     @Environment(\.presentationMode) var presentationMode
-    @StateObject private var viewModel = WishGiftFormViewModel()
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var navigateToWishlist = false
     @State private var isManualEntry = false
+    let wishlist: Wishlist
+    @State var selectedWishlist: UUID? = MockWishlists.wishlists.first?.id
     
-
+    @StateObject private var viewModel: WishGiftFormViewModel
+    
+    init(wishlist: Wishlist) {
+        self.wishlist = wishlist
+        _viewModel = StateObject(wrappedValue: WishGiftFormViewModel(wishlist: wishlist))
+    }
+    
     var body: some View {
-            MainLayoutView(isRootView: false) {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Add a Gift to Your Wishlist")
-                        .font(.largeTitle)
-                        .bold()
-                        .padding()
-                        .padding(.bottom, 20)
-
-                    ScrollView(showsIndicators: false) {
-                        VStack(spacing: 20) {
-                            modeToggle
-
-                            if isManualEntry {
-                                giftImagesPicker
-                            } else {
-                                storeLinkField
-                                fetchDetailsButton
-                                fetchedImages
-                            }
-
-                            giftInfoFields
-                            
-                            HStack(spacing: 16) {
-                                categoryPicker
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                
-                                occasionPicker
-                                    .frame(maxWidth: .infinity, alignment: .trailing)
-                            }.padding(.top, -20)
-                            
-                            addGiftButton
+        MainLayoutView(isRootView: false) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Add a Gift to Your Wishlist")
+                    .font(.largeTitle)
+                    .bold()
+                    .padding()
+                    .padding(.bottom, 20)
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 20) {
+                        modeToggle
+                        
+                        if isManualEntry {
+                            giftImagesPicker
+                        } else {
+                            storeLinkField
+                            fetchDetailsButton
+                            fetchedImages
                         }
-                    }
-                    .padding(.horizontal)
-                }
-                .alert(alertMessage, isPresented: $showAlert) {
-                    Button("OK", role: .cancel) {
-                        if navigateToWishlist {
-                            navigateToWishlist = true
-                        }
+                        
+                        giftInfoFields
+                        
+                        HStack(spacing: 16) {
+                            categoryPicker
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            wishlistPicker.frame(maxWidth: .infinity, alignment: .trailing)
+                        }.padding(.top, -20)
+                        
+                        addGiftButton
                     }
                 }
-                .navigationDestination(isPresented: $navigateToWishlist) {
-                    WishGiftView()
+                .padding(.horizontal)
+            }
+            .alert(alertMessage, isPresented: $showAlert) {
+                Button("OK", role: .cancel) {
+                    if navigateToWishlist {
+                        navigateToWishlist = true
+                    }
                 }
             }
-            .navigationBarBackButtonHidden(true)
+            .navigationDestination(isPresented: $navigateToWishlist) {
+                WishlistView()
+            }
         }
+        .navigationBarBackButtonHidden(true)
+    }
     
     // MARK: - Mode Toggle (Auto-Fetch vs Manual Entry)
     private var modeToggle: some View {
@@ -84,10 +89,10 @@ struct AddWishGiftView: View {
         .onAppear {
             UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(Color("App_Primary"))
             UISegmentedControl.appearance().backgroundColor = UIColor.clear
-
+            
         }
     }
-
+    
     // MARK: - Fetched Images Display
     private var fetchedImages: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -112,31 +117,21 @@ struct AddWishGiftView: View {
             }
         }
     }
-
+    
     // MARK: - Store Link Input Field
     private var storeLinkField: some View {
         AppTextField(placeholder: "Enter Product Link*", text: $viewModel.storeLink)
     }
-
+    
     // MARK: - Fetch Details Button
     private var fetchDetailsButton: some View {
-        Button(action: {
-            viewModel.fetchGiftDetails()
-        }) {
-            HStack {
-                if viewModel.isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                }
-                Text(viewModel.isLoading ? "Fetching..." : "Fetch Details")
-                    .foregroundColor(.white)
-                    .fontWeight(.medium)
-            }
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(Color("App_Primary"))
-            .cornerRadius(10)
-        }
+        SecondaryButton(
+            action: {
+                viewModel.fetchGiftDetails()
+            },
+            title: "Fetch Details",
+            isLoading: viewModel.isLoading
+        )
         .padding(.top, -10)
         .padding(.bottom, 20)
         .disabled(viewModel.isLoading || viewModel.storeLink.isEmpty)
@@ -144,40 +139,45 @@ struct AddWishGiftView: View {
             Button("OK", role: .cancel) { }
         }
     }
-
-
+    
+    
     private var giftImagesPicker: some View {
         GiftImagesPickerView(
             imageManager: viewModel.imageManager,
             removeFetchedImage: { viewModel.removeFetchedImage($0) }
         )
-}
-
-
+    }
+    
+    
     // MARK: - Gift Info Fields
     private var giftInfoFields: some View {
         VStack(alignment: .leading, spacing: 0) {
             AppTextField(placeholder: "Gift Name*", text: $viewModel.name, characterLimit: 50)
             AppTextField(placeholder: "Gift Description*", text: $viewModel.description, characterLimit: 250, isMultiline: true)
-            AppTextField(placeholder: "Price", text: $viewModel.priceString, keyboardType: .decimalPad)
-         
-            AppTextField(placeholder: "Brand", text: $viewModel.brand)
             
-            AppTextField(placeholder: "Currency (e.g., USD, EUR)", text: $viewModel.currency)
-
+            
+            HStack(spacing: 16) {
+                AppTextField(placeholder: "Currency (e.g., USD, EUR)", text: $viewModel.currency)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                AppTextField(placeholder: "Price", text: $viewModel.priceString, keyboardType: .decimalPad)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                
+            }
+            
+            
             if isManualEntry {
                 AppTextField(placeholder: "Store Link*", text: $viewModel.storeLink)
             }
         }
     }
-
-
+    
+    
     // MARK: - Gift Category Picker
     private var categoryPicker: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .center, spacing: 0) {
             Text("Category")
                 .font(.headline)
-
+            
             Picker("Select a category", selection: $viewModel.selectedCategory) {
                 ForEach(GiftCategory.allCases, id: \.self) { category in
                     Text(category.rawValue.capitalized)
@@ -187,20 +187,45 @@ struct AddWishGiftView: View {
         }
     }
     
-    private var occasionPicker: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text("Occasion")
+    private var wishlistPicker: some View {
+        VStack(alignment: .center, spacing: 0) {
+            Text("Wishlist")
                 .font(.headline)
-
-            Picker("Select an occasion", selection: $viewModel.selectedOccasion) {
-                ForEach(WishlistCategory.allCases, id: \.self) { occasion in
-                    Text(occasion.rawValue.capitalized)
+            
+            ZStack {
+                Picker("", selection: $selectedWishlist) {
+                    ForEach(MockWishlists.wishlists, id: \.id) { wishlist in
+                        Text(wishlist.name)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .tag(wishlist.id)
+                    }
                 }
+                .pickerStyle(MenuPickerStyle())
+                .opacity(0.02)
+                HStack {
+                    Text(selectedWishlistName)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .foregroundColor(Color.blue)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Image(systemName: "chevron.down").foregroundColor(Color.blue)
+                }
+                .padding(.horizontal)
+                .allowsHitTesting(false)
             }
-            .pickerStyle(MenuPickerStyle())
+            .frame(width: 200)
         }
     }
-
+    
+    
+    private var selectedWishlistName: String {
+        MockWishlists.wishlists.first { $0.id == selectedWishlist }?.name ?? "Select a wishlist"
+    }
+    
+    
+    
+    
     // MARK: - Add Gift Button
     private var addGiftButton: some View {
         VStack {
@@ -213,7 +238,7 @@ struct AddWishGiftView: View {
         }
         .padding(.bottom, 50)
     }
-
+    
     // MARK: - Add Gift Logic
     private func addGift() {
         let result = viewModel.addGiftToWishlist()
@@ -224,10 +249,20 @@ struct AddWishGiftView: View {
             alertMessage = "Gift added successfully!"
             showAlert = true
             navigateToWishlist = true
+            presentationMode.wrappedValue.dismiss()
         }
     }
 }
 
-#Preview{
-    AddWishGiftView()
+#Preview {
+    AddWishGiftView(wishlist: Wishlist(
+        id: UUID(),
+        userId: UUID(),
+        name: "Birthday Wishlist",
+        description: "My birthday gift ideas",
+        isPrivate: false,
+        isActive: true,
+        category: .birthday
+    ))
 }
+

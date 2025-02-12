@@ -57,8 +57,6 @@ struct WishGiftCard: View {
                     .foregroundColor(.secondary)
                     .lineLimit(1)
                     .truncationMode(.tail)
-                
-                OccasionView(occasion: gift.occasion)
 
                 HStack {
                     if let price = gift.price, let currency = gift.currency {
@@ -100,7 +98,7 @@ struct WishGiftCard_Previews: PreviewProvider {
         VStack {
             WishGiftCard(gift: WishGift(
                 id: UUID(), name: "Gift 1", description: "A beautiful gift", category: .beauty, images: ["https://picsum.photos/300/200", "https://picsum.photos/300/200"], storeLink: "String", price: 25, currency: "USD", brand: "nike", addedDate: Date(),
-                occasion: .birthday
+                wishListId: UUID()
             ), onRemove: {print("Removed")})
         }
         .previewLayout(.sizeThatFits)

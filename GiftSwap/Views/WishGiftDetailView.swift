@@ -10,7 +10,7 @@ import Combine
 
 struct WishGiftDetailView: View {
     let gift: WishGift
-    @ObservedObject var viewModel: WishlistViewModel
+    @ObservedObject var viewModel: WishGiftFormViewModel
     @State private var currentIndex: Int = 0
     @State private var showConfirmation = false
     @State private var showAlert = false
@@ -44,7 +44,7 @@ struct WishGiftDetailView: View {
     @ViewBuilder
     private func RemoveGiftButton() -> some View {
         CTAButton(
-            label: "Remove from Wishlist",
+            label: "Remove from \(viewModel.wishlist.name)",
             backgroundColor: .red,
             action: {
                 showConfirmation = true
@@ -123,8 +123,6 @@ struct WishGiftDetails: View {
             Text(gift.description)
                 .font(.body)
 
-            OccasionView(occasion: gift.occasion)
-
             if let brand = gift.brand {
                 Text("Brand: \(brand)")
                     .font(.body)
@@ -182,18 +180,32 @@ struct WishGiftPlaceholderView: View {
 struct WishGiftDetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            WishGiftDetailView(gift: WishGift(
-                name: "Luxury Handbag",
-                description: "A premium leather handbag with an elegant design.",
-                category: .fashion,
-                images: ["https://picsum.photos/300/200", "https://picsum.photos/300/200"],
-                storeLink: "https://store.com/luxury-handbag",
-                price: 249.99,
-                currency: "USD",
-                brand: "Designer Brand",
-                occasion: .birthday
-            ), viewModel: WishlistViewModel())
+            WishGiftDetailView(
+                gift: WishGift(
+                    id: UUID(),
+                    name: "Luxury Handbag",
+                    description: "A premium leather handbag with an elegant design.",
+                    category: .fashion,
+                    images: ["https://picsum.photos/300/200", "https://picsum.photos/300/200"],
+                    storeLink: "https://store.com/luxury-handbag",
+                    price: 249.99,
+                    currency: "USD",
+                    brand: "Designer Brand",
+                    wishListId: UUID()
+                ),
+                viewModel: WishGiftFormViewModel(wishlist: Wishlist(
+                    id: UUID(),
+                    userId: UUID(),
+                    name: "Birthday Wishlist",
+                    description: "A list of birthday gift ideas",
+                    isPrivate: false,
+                    isActive: true,
+                    category: .birthday,
+                    addedAt: Date()
+                ))
+            )
         }
     }
 }
+
 
