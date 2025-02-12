@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct GiftSwapApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView().onAppear {
+                UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+            }
         }
     }
 }

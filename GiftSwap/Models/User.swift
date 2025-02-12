@@ -25,7 +25,7 @@ struct User: Identifiable, Codable {
     init(
         id: UUID = UUID(),
         name: String,
-        email: String,
+        username: String,
         password: String,
         profilePictureURL: String? = nil,
         rating: Double = 5.0,
@@ -38,7 +38,7 @@ struct User: Identifiable, Codable {
     ) {
         self.id = id
         self.name = name
-        self.email = email
+        self.email = username
         self.profilePictureURL = profilePictureURL
         self.rating = rating
         self.location = location

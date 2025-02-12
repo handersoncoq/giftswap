@@ -18,13 +18,17 @@ class AuthService: ObservableObject {
 
     private init() {}
 
-    func login(email: String, password: String) -> AnyPublisher<User?, Error> {
-        return UserService.shared.fetchUserByEmailAndPassword(email: email, password: password)
+    func login(username: String, password: String) -> AnyPublisher<User?, Error> {
+        return UserService.shared.fetchUserByUsernameAndPassword(username: username, password: password)
             .handleEvents(receiveOutput: { user in
                 DispatchQueue.main.async {
-                    self.currentUser = user
-                    withAnimation(.easeInOut(duration: 0.5)) {
-                        self.isAuthenticated = true
+                    if let user = user {
+                        self.currentUser = user
+                        withAnimation(.easeInOut(duration: 0.5)) {
+                            self.isAuthenticated = true
+                        }
+                    } else {
+                        print("Login failed: User not found")
                     }
                 }
             })

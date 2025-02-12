@@ -1,48 +1,45 @@
 //
-//  SwapBasketViewModel.swift
+//  WishlistViewModel.swift
 //  GiftSwap
 //
-//  Created by Handerson COQ on 2/8/25.
+//  Created by Handerson COQ on 2/10/25.
 //
 
 import SwiftUI
 import Combine
 
-class SwapBasketViewModel: ObservableObject {
-    @Published var giftsByCategory: [GiftCategory: [SwapGift]] = [:]
-    private var allGiftsByCategory: [GiftCategory: [SwapGift]] = [:]
-    @Published var searchText: String = ""
-    @Published var pendingSwapRequests: [SwapGift] = []
+class WishlistViewModel: ObservableObject {
+    @Published var giftsByCategory: [GiftCategory: [WishGift]] = [:]
+    private var allGiftsByCategory: [GiftCategory: [WishGift]] = [:]
     @Published var isLoading: Bool = false
+    @Published var searchText: String = ""
 
     private var cancellables = Set<AnyCancellable>()
 
     init() {
-        fetchSwapBasketGifts()
+        fetchWishlistGifts()
     }
 
-    func fetchSwapBasketGifts() {
-        SwapBasketService.shared.fetchAllGiftsInSwapBaskets()
+    // Fetch wishlist gifts and group them by category
+    func fetchWishlistGifts() {
+        WishGiftService.shared.fetchWishGifts()
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 if case .failure(let error) = completion {
-                    print("Error fetching swap basket gifts: \(error.localizedDescription)")
+                    print("Error fetching wishlist gifts: \(error.localizedDescription)")
                 }
             }, receiveValue: { fetchedGifts in
-                // Keep only gifts that are available for swapping
-                let marketplaceGifts = fetchedGifts.filter { $0.swapStatus == .available }
-
-                // Group them by category
-                self.allGiftsByCategory = Dictionary(grouping: marketplaceGifts, by: { $0.category })
+                // Group gifts by category
+                self.allGiftsByCategory = Dictionary(grouping: fetchedGifts, by: { $0.category })
                 
                 self.filterGifts()
             })
             .store(in: &cancellables)
     }
 
-
-    func removeGift(_ gift: SwapGift) {
-        SwapBasketService.shared.removeGiftFromSwapBasket(giftId: gift.id)
+    // Remove a gift from the wishlist
+    func removeGift(_ gift: WishGift) {
+        WishGiftService.shared.deleteWishGift(id: gift.id)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 if case .failure(let error) = completion {
@@ -56,6 +53,7 @@ class SwapBasketViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
+    // Filter gifts based on search input
     func filterGifts() {
         if searchText.isEmpty {
             giftsByCategory = allGiftsByCategory
@@ -66,13 +64,12 @@ class SwapBasketViewModel: ObservableObject {
         }
     }
 
-
-    
     // Refresh wishlist
-    func refreshSwapBasket() {
+    
+    func refreshWishlist() {
         isLoading = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            self.fetchSwapBasketGifts()
+            self.fetchWishlistGifts()
             self.isLoading = false
         }
     }

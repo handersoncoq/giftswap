@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BottomNav: View {
     @State private var navigateToSwapBasket = false
+    @State private var navigateToWishlist = false // ✅ Add state for Wishlist navigation
     @State private var showGiftMatching = false
     @State private var isAnimating = false
 
@@ -30,8 +31,8 @@ struct BottomNav: View {
 
                     swapButton
 
-                    BottomNavItem(icon: "heart", label: "Wishlist") {
-                        print("Wishlist")
+                    BottomNavItem(icon: "heart", label: "Wishlist") { // ✅ Handle Wishlist Tap
+                        navigateToWishlist = true
                     }
                     BottomNavItem(icon: "person.2", label: "Friends") {
                         print("Friends")
@@ -43,6 +44,9 @@ struct BottomNav: View {
         }
         .navigationDestination(isPresented: $navigateToSwapBasket) {
             SwapBasketView()
+        }
+        .navigationDestination(isPresented: $navigateToWishlist) { // ✅ Add Wishlist Navigation
+            WishGiftView()
         }
         .sheet(isPresented: $showGiftMatching) {
             GiftMatchingView(isPresented: $showGiftMatching)
@@ -76,6 +80,7 @@ struct BottomNav: View {
         .offset(y: -12)
     }
 }
+
 
 
 

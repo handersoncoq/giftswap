@@ -56,7 +56,7 @@ struct MarketplaceView: View {
 
 struct CategorySection: View {
     let category: GiftCategory
-    let gifts: [Gift]
+    let gifts: [SwapGift]
     let viewModel: MarketplaceViewModel
 
     var body: some View {

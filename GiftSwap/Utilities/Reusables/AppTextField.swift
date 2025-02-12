@@ -36,6 +36,7 @@ struct AppTextField: View {
                         )
                         .foregroundColor(.primary)
                         .scrollContentBackground(.hidden)
+                        .textSelection(.enabled)
                         .onChange(of: text) { _, newValue in
                             if let limit = characterLimit, newValue.count > limit {
                                 text = String(newValue.prefix(limit))
@@ -48,6 +49,7 @@ struct AppTextField: View {
                             .background(Color("Primary_Neutral").opacity(0.06))
                             .cornerRadius(10)
                             .autocapitalization(.none)
+                            .textSelection(.enabled)
                             .onChange(of: text) { _, newValue in
                                 if let limit = characterLimit, newValue.count > limit {
                                     text = String(newValue.prefix(limit))
@@ -62,6 +64,7 @@ struct AppTextField: View {
                             .padding(10)
                             .background(Color("Primary_Neutral").opacity(0.06))
                             .cornerRadius(10)
+                            .textSelection(.enabled)
                             .onChange(of: text) { _, newValue in
                                 if let limit = characterLimit, newValue.count > limit {
                                     text = String(newValue.prefix(limit))
@@ -74,6 +77,7 @@ struct AppTextField: View {
         .padding(.bottom, 20)
     }
 }
+
 
 
 

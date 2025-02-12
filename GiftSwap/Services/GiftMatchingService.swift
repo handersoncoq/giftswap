@@ -15,8 +15,8 @@ class GiftMatchingService {
     private var cancellables = Set<AnyCancellable>()
 
     // Finds a match for a given gift in the swap basket
-    func findMatch(for gift: Gift, userId: UUID) -> AnyPublisher<Gift?, Error> {
-        return Future<Gift?, Error> { promise in
+    func findMatch(for gift: SwapGift, userId: UUID) -> AnyPublisher<SwapGift?, Error> {
+        return Future<SwapGift?, Error> { promise in
             // Step 1: Fetch ALL wishlists for this user
             WishlistService.shared.fetchWishlists(forUserId: userId)
                 .map { wishlists in
@@ -27,7 +27,7 @@ class GiftMatchingService {
                         }
                     }
                 }
-                .flatMap { wishlistGifts -> AnyPublisher<Gift?, Error> in
+                .flatMap { wishlistGifts -> AnyPublisher<SwapGift?, Error> in
                     // Step 2: Fetch all gifts in swap baskets
                     SwapBasketService.shared.fetchAllGiftsInSwapBaskets()
                         .map { swapGifts in
@@ -52,7 +52,7 @@ class GiftMatchingService {
     }
 
     // Finds a matching gift based on multiple criteria
-    private func findMatchingGift(gift: Gift, wishlistGifts: [Gift], swapGifts: [Gift]) -> Gift? {
+    private func findMatchingGift(gift: SwapGift, wishlistGifts: [SwapGift], swapGifts: [SwapGift]) -> SwapGift? {
         // Exact Name Match
         if let match = wishlistGifts.first(where: { $0.name.lowercased() == gift.name.lowercased() }) {
             return match
@@ -93,9 +93,9 @@ class GiftMatchingService {
     }
     
     // Start the process
-    func startMatchingProcess(for userId: UUID) -> AnyPublisher<Gift?, Error> {
+    func startMatchingProcess(for userId: UUID) -> AnyPublisher<SwapGift?, Error> {
         return SwapBasketService.shared.fetchAllGiftsInSwapBaskets()
-            .flatMap { gifts -> AnyPublisher<Gift?, Error> in
+            .flatMap { gifts -> AnyPublisher<SwapGift?, Error> in
                 if let gift = gifts.first(where: { $0.ownerId == userId }) {
                     return self.findMatch(for: gift, userId: userId)
                 }

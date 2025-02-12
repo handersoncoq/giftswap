@@ -1,5 +1,5 @@
 //
-//  Gift.swift
+//  SwapGift.swift
 //  GiftSwap
 //
 //  Created by Handerson COQ on 1/27/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Gift: Identifiable, Codable {
+struct SwapGift: Identifiable, Codable {
     var id: UUID
     var name: String
     var description: String

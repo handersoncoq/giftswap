@@ -1,5 +1,5 @@
 //
-//  SwapBasketGiftCard.swift
+//  SwapGiftCard.swift
 //  GiftSwap
 //
 //  Created by Handerson COQ on 2/8/25.
@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct SwapBasketGiftCard: View {
-    let gift: Gift
+struct SwapGiftCard: View {
+    let gift: SwapGift
     let onRemove: () -> Void
     private let cardSize: CGFloat = 170
 
@@ -89,10 +89,10 @@ struct SwapBasketGiftCard: View {
 }
 
 
-struct SwapBasketGiftCard_Previews: PreviewProvider {
+struct SwapGiftCard_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            SwapBasketGiftCard(gift: Gift(
+            SwapGiftCard(gift: SwapGift(
                 name: "Luxury Watch",
                 description: "A sleek and stylish timepiece for any occasion hjhf hjhf hjhj fhjh.",
                 imageURLs: ["https://picsum.photos/300/200", "https://picsum.photos/300/200"],

@@ -7,10 +7,6 @@
 
 import Foundation
 
-enum WishlistCategory: String, Codable {
-    case birthday, christmas, wedding, milestone, anniversary, personal, other
-}
-
 struct Wishlist: Identifiable, Codable {
     var id: UUID
     var userId: UUID

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct GiftDetailView: View {
-    let gift: Gift
+    let gift: SwapGift
     @State private var currentIndex: Int = 0
     
     var body: some View {
@@ -136,7 +136,7 @@ struct GiftDetailView: View {
 struct GiftDetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            GiftDetailView(gift: Gift(
+            GiftDetailView(gift: SwapGift(
                 name: "Luxury Watch",
                 description: "A sleek and stylish timepiece for any occasion.",
                 imageURLs: ["https://picsum.photos/300/200", "https://picsum.photos/300/200"],

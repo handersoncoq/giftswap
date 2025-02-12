@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MainLayoutView<Content: View>: View {
+    
     var isRootView: Bool
     let content: Content
     @StateObject private var navigationManager = NavigationManager.shared

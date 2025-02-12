@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		59C5540F2D5AA92800E24E6F /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 59C5540E2D5AA92800E24E6F /* SwiftSoup */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		5972ADE02D4868360051EA27 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				59C5540F2D5AA92800E24E6F /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = GiftSwap;
 			packageProductDependencies = (
+				59C5540E2D5AA92800E24E6F /* SwiftSoup */,
 			);
 			productName = GiftSwap;
 			productReference = 5972ADCF2D4868320051EA27 /* GiftSwap.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 5972ADC62D4868320051EA27;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				59C5540D2D5AA92800E24E6F /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5972ADD02D4868320051EA27 /* Products */;
 			projectDirPath = "";
@@ -552,6 +561,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		59C5540D2D5AA92800E24E6F /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.7;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		59C5540E2D5AA92800E24E6F /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 59C5540D2D5AA92800E24E6F /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 5972ADC72D4868320051EA27 /* Project object */;
 }

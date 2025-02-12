@@ -12,7 +12,7 @@ struct GiftMatchingView: View {
     @Binding var isPresented: Bool
     @State private var statusText: String = "Looking into your swap basket..."
     @State private var showMatchResult = false
-    @State private var matchedGift: Gift?
+    @State private var matchedGift: SwapGift?
     @State private var cancellables = Set<AnyCancellable>()
     
     var body: some View {
@@ -86,7 +86,7 @@ struct GiftMatchingView: View {
         }
     }
     
-    private func matchFoundView(gift: Gift) -> some View {
+    private func matchFoundView(gift: SwapGift) -> some View {
         VStack {
             Text("Match Found!")
                 .font(.headline)
@@ -136,7 +136,7 @@ struct GiftMatchingView: View {
         }
     }
     
-    private func confirmSwap(for gift: Gift) {
+    private func confirmSwap(for gift: SwapGift) {
         // Update swap status to pending
         SwapBasketService.shared.updateSwapStatus(for: gift.id, to: .pending)
 

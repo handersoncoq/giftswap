@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct GiftCard: View {
-    let gift: Gift
+    let gift: SwapGift
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -82,7 +82,7 @@ struct GiftCard: View {
 struct GiftCard_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            GiftCard(gift: Gift(
+            GiftCard(gift: SwapGift(
                 name: "Luxury Watch",
                 description: "A sleek and stylish timepiece for any occasion hjhf hjhf hjhj fhjh.",
                 imageURLs: ["https://picsum.photos/300/200"],

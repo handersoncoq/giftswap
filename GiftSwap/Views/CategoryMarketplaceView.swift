@@ -11,7 +11,7 @@ struct CategoryMarketplaceView: View {
     let category: GiftCategory
     @StateObject private var viewModel = MarketplaceViewModel()
     @State private var currentPage = 1
-    @State private var paginatedGifts: [Gift] = []
+    @State private var paginatedGifts: [SwapGift] = []
     private let itemsPerPage = 10
     
     private let columns = [

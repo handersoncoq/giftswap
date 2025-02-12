@@ -23,10 +23,10 @@ class SwapBasketService {
     }
 
     // Fetch all gifts currently in swap baskets using `GiftService`
-    func fetchAllGiftsInSwapBaskets() -> AnyPublisher<[Gift], Error> {
+    func fetchAllGiftsInSwapBaskets() -> AnyPublisher<[SwapGift], Error> {
         let giftIdsInSwapBaskets = swapBaskets.map { $0.giftId }
 
-        return GiftService.shared.fetchGifts()
+        return SwapGiftService.shared.fetchGifts()
             .map { allGifts in
                 allGifts.filter { giftIdsInSwapBaskets.contains($0.id) }
             }
@@ -34,7 +34,7 @@ class SwapBasketService {
     }
     
     // Fetch swap basket gifts for a specific user
-    func fetchUserSwapBasketGifts(userId: UUID) -> AnyPublisher<[Gift], Error> {
+    func fetchUserSwapBasketGifts(userId: UUID) -> AnyPublisher<[SwapGift], Error> {
         return fetchAllGiftsInSwapBaskets()
             .map { allGifts in
                 allGifts.filter { $0.ownerId == userId }

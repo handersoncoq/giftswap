@@ -1,20 +1,21 @@
 //
-//  SmallGiftCard.swift
+//  WishGiftCard.swift
 //  GiftSwap
 //
-//  Created by Handerson COQ on 2/2/25.
+//  Created by Handerson COQ on 2/10/25.
 //
 
 import SwiftUI
 
-struct SmallGiftCard: View {
-    let gift: SwapGift
+struct WishGiftCard: View {
+    let gift: WishGift
+    let onRemove: () -> Void
     private let cardSize: CGFloat = 170
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             ZStack {
-                if let firstImageUrl = gift.imageURLs?.first, !firstImageUrl.isEmpty {
+                if let firstImageUrl = gift.images.first, !firstImageUrl.isEmpty {
                     AsyncImage(url: URL(string: firstImageUrl)) { image in
                         image.resizable()
                             .scaledToFill()
@@ -36,7 +37,8 @@ struct SmallGiftCard: View {
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color("App_Primary"), lineWidth: 1).padding()
+                                .stroke(Color("App_Primary"), lineWidth: 1)
+                                .padding()
                                 .padding(.bottom, -12)
                         )
                 }
@@ -55,8 +57,32 @@ struct SmallGiftCard: View {
                     .foregroundColor(.secondary)
                     .lineLimit(1)
                     .truncationMode(.tail)
+                
+                OccasionView(occasion: gift.occasion)
 
-                SwapStatusView(status: gift.swapStatus).padding(.vertical, 10)
+                HStack {
+                    if let price = gift.price, let currency = gift.currency {
+                        Text("\(currency) \(String(format: "%.2f", price))")
+                            .font(.caption)
+                            .foregroundColor(Color.blue).padding(.vertical, 10)
+                    } else {
+                        Text("Price Unavailable")
+                            .font(.subheadline)
+                            .foregroundColor(.gray).padding(.vertical, 10)
+                    }
+
+                    Spacer()
+
+                    // Remove button
+                    Button(action: onRemove) {
+                        Image(systemName: "trash")
+                            .resizable()
+                            .frame(width: 24, height: 24)
+                            .foregroundColor(.red)
+                            .background(Color.white.clipShape(Circle()))
+                    }
+                    .padding(.trailing, 4)
+                }
             }
             .padding(.horizontal, 8)
             .padding(.bottom, 8)
@@ -69,23 +95,13 @@ struct SmallGiftCard: View {
     }
 }
 
-
-
-struct SmallGiftCard_Previews: PreviewProvider {
+struct WishGiftCard_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            SmallGiftCard(gift: SwapGift(
-                name: "Luxury Watch",
-                description: "A sleek and stylish timepiece for any occasion hjhf hjhf hjhj fhjh.",
-                imageURLs: [],
-                value: 199.99,
-                isAvailable: true,
-                storeLink: "https://store.com/luxury-watch",
-                category: .fashion,
-                ownerId: UUID(),
-                swapStatus: .available,
-                addedAt: Date()
-            ))
+            WishGiftCard(gift: WishGift(
+                id: UUID(), name: "Gift 1", description: "A beautiful gift", category: .beauty, images: ["https://picsum.photos/300/200", "https://picsum.photos/300/200"], storeLink: "String", price: 25, currency: "USD", brand: "nike", addedDate: Date(),
+                occasion: .birthday
+            ), onRemove: {print("Removed")})
         }
         .previewLayout(.sizeThatFits)
     }

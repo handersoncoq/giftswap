@@ -43,7 +43,7 @@ class WishlistService {
             .eraseToAnyPublisher()
     }
 
-    // Add a wishlist (mock persistence)
+    // Add a wishlist
     func addWishlist(_ wishlist: Wishlist) -> AnyPublisher<Wishlist, Error> {
         wishlists.append(wishlist)
 
@@ -53,7 +53,7 @@ class WishlistService {
             .eraseToAnyPublisher()
     }
 
-    // Update a wishlist (mock persistence)
+    // Update a wishlist
     func updateWishlist(_ updatedWishlist: Wishlist) -> AnyPublisher<Wishlist, Error> {
         if let index = wishlists.firstIndex(where: { $0.id == updatedWishlist.id }) {
             wishlists[index] = updatedWishlist
@@ -67,7 +67,7 @@ class WishlistService {
         }
     }
 
-    // Delete a wishlist (mock persistence)
+    // Delete a wishlist
     func deleteWishlist(id: UUID) -> AnyPublisher<Bool, Error> {
         if let index = wishlists.firstIndex(where: { $0.id == id }) {
             wishlists.remove(at: index)
@@ -80,4 +80,23 @@ class WishlistService {
                 .eraseToAnyPublisher()
         }
     }
+
+    // **New Methods**
+    
+    // Fetch a specific wishlist
+    func fetchWishlist(id: UUID) -> AnyPublisher<Wishlist?, Error> {
+        let wishlist = wishlists.first { $0.id == id }
+        return Just(wishlist)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
+
+    // Fetch all categories with associated wishlists
+    func fetchWishlistsGroupedByCategory() -> AnyPublisher<[WishlistCategory: [Wishlist]], Error> {
+        let groupedWishlists = Dictionary(grouping: wishlists, by: { $0.category })
+        return Just(groupedWishlists)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
+    }
 }
+

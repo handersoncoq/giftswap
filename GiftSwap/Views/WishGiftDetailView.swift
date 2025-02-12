@@ -1,17 +1,16 @@
 //
-//  SwapGiftDetailView.swift
+//  WishGiftDetailView.swift
 //  GiftSwap
 //
-//  Created by Handerson COQ on 2/8/25.
+//  Created by Handerson COQ on 2/10/25.
 //
 
 import SwiftUI
 import Combine
 
-
-struct SwapGiftDetailView: View {
-    let gift: SwapGift
-    @ObservedObject var viewModel: SwapBasketViewModel
+struct WishGiftDetailView: View {
+    let gift: WishGift
+    @ObservedObject var viewModel: WishlistViewModel
     @State private var currentIndex: Int = 0
     @State private var showConfirmation = false
     @State private var showAlert = false
@@ -22,9 +21,8 @@ struct SwapGiftDetailView: View {
         MainLayoutView(isRootView: false) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    GiftImageCarousel(gift: gift, currentIndex: $currentIndex)
-                    GiftDetails(gift: gift)
-                    SwapStatusView(status: gift.swapStatus)
+                    WishGiftImageCarousel(gift: gift, currentIndex: $currentIndex)
+                    WishGiftDetails(gift: gift)
                     RemoveGiftButton()
                 }
                 .padding()
@@ -33,28 +31,23 @@ struct SwapGiftDetailView: View {
             .alert(alertMessage, isPresented: $showAlert) {
                 Button("OK", role: .cancel) { }
             }
-            .confirmationDialog("Are you sure you want to remove \(gift.name) from your swap basket?", isPresented: $showConfirmation, titleVisibility: .visible) {
+            .confirmationDialog("Are you sure you want to remove \(gift.name) from your wishlist?", isPresented: $showConfirmation, titleVisibility: .visible) {
                 Button("Remove", role: .destructive) {
-                    removeGiftFromSwapBasket()
+                    removeGiftFromWishlist()
                 }
                 Button("Cancel", role: .cancel) { }
             }
         }
     }
 
-    // Remove gift button
+    // MARK: - Remove Gift Button
     @ViewBuilder
     private func RemoveGiftButton() -> some View {
         CTAButton(
-            label: "Remove from Swap Basket",
+            label: "Remove from Wishlist",
             backgroundColor: .red,
             action: {
-                if gift.swapStatus == .pending {
-                    alertMessage = "This gift's swap status is currently pending and cannot be removed."
-                    showAlert = true
-                } else {
-                    showConfirmation = true
-                }
+                showConfirmation = true
             },
             icon: Image(systemName: "trash")
         )
@@ -62,10 +55,10 @@ struct SwapGiftDetailView: View {
         .padding(.top, 8)
     }
 
-    // Remove Gift
-    private func removeGiftFromSwapBasket() {
+    // MARK: - Remove Gift Logic
+    private func removeGiftFromWishlist() {
         viewModel.removeGift(gift)
-        alertMessage = "Gift \"\(gift.name)\" has been removed from your swap basket."
+        alertMessage = "Gift \"\(gift.name)\" has been removed from your wishlist."
         showAlert = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             presentationMode.wrappedValue.dismiss()
@@ -73,24 +66,24 @@ struct SwapGiftDetailView: View {
     }
 }
 
-// Gift Images
-struct GiftImageCarousel: View {
-    let gift: SwapGift
+// MARK: - Gift Images
+struct WishGiftImageCarousel: View {
+    let gift: WishGift
     @Binding var currentIndex: Int
 
     var body: some View {
-        if let images = gift.imageURLs, !images.isEmpty {
+        if !gift.images.isEmpty {
             ZStack {
                 TabView(selection: $currentIndex) {
-                    ForEach(images.indices, id: \.self) { index in
-                        AsyncImage(url: URL(string: images[index])) { phase in
+                    ForEach(gift.images.indices, id: \.self) { index in
+                        AsyncImage(url: URL(string: gift.images[index])) { phase in
                             switch phase {
                             case .empty:
                                 ProgressView().frame(height: 300)
                             case .success(let image):
                                 image.resizable().frame(maxWidth: 450, maxHeight: 270).cornerRadius(16)
                             case .failure:
-                                PlaceholderView().frame(height: 300)
+                                WishGiftPlaceholderView().frame(height: 300)
                             @unknown default:
                                 EmptyView()
                             }
@@ -102,8 +95,8 @@ struct GiftImageCarousel: View {
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
 
                 // Image Indicator
-                if images.count >= 1 {
-                    Text("\(currentIndex + 1)/\(images.count)")
+                if gift.images.count > 1 {
+                    Text("\(currentIndex + 1)/\(gift.images.count)")
                         .font(.body)
                         .foregroundColor(Color("App_Primary"))
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -112,14 +105,14 @@ struct GiftImageCarousel: View {
             }
             .padding(.bottom, 30)
         } else {
-            PlaceholderView().frame(height: 300)
+            WishGiftPlaceholderView().frame(height: 300)
         }
     }
 }
 
-// Gift Details
-struct GiftDetails: View {
-    let gift: SwapGift
+// MARK: - Gift Details
+struct WishGiftDetails: View {
+    let gift: WishGift
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -130,27 +123,43 @@ struct GiftDetails: View {
             Text(gift.description)
                 .font(.body)
 
-            Text("Category: \(gift.category.rawValue.capitalized)")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            OccasionView(occasion: gift.occasion)
 
-            HStack {
-                Text("Value: $\(gift.value, specifier: "%.2f")")
+            if let brand = gift.brand {
+                Text("Brand: \(brand)")
                     .font(.body)
-                    .foregroundColor(Color.blue)
-
-                if let storeLink = gift.storeLink, let url = URL(string: storeLink) {
-                    Link(destination: url) {
-                        Image(systemName: "link")
-                    }
-                }
+                    .foregroundColor(.gray)
             }
+            
+            HStack {
+                // Display price if available
+                if let price = gift.price {
+                    Text("Price: \(gift.currency ?? "0") \(price, specifier: "%.2f")")
+                        .font(.body)
+                        .foregroundColor(Color.blue)
+                } else {
+                    Text("Price: Unavailable")
+                        .font(.body)
+                        .foregroundColor(.gray)
+                }
+
+                if !gift.storeLink.isEmpty, let url = URL(string: gift.storeLink) {
+                        Link(destination: url) {
+                            Image(systemName: "link")
+                                .foregroundColor(.blue)
+                                .padding(.leading, 5)
+                        }
+                    }
+            }
+
+
+           
         }
     }
 }
 
-// Placeholder Image
-struct PlaceholderView: View {
+// MARK: - Placeholder Image
+struct WishGiftPlaceholderView: View {
     var body: some View {
         RoundedRectangle(cornerRadius: 16)
             .fill(Color.white)
@@ -170,25 +179,21 @@ struct PlaceholderView: View {
     }
 }
 
-
-
-
-// Preview
-struct SwapGiftDetailView_Previews: PreviewProvider {
+struct WishGiftDetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            SwapGiftDetailView(gift: SwapGift(
-                name: "Luxury Watch",
-                description: "A sleek and stylish timepiece for any occasion.",
-                imageURLs: ["https://picsum.photos/300/200", "https://picsum.photos/300/200"],
-                value: 199.99,
-                isAvailable: true,
-                storeLink: "https://store.com/luxury-watch",
+            WishGiftDetailView(gift: WishGift(
+                name: "Luxury Handbag",
+                description: "A premium leather handbag with an elegant design.",
                 category: .fashion,
-                ownerId: UUID(),
-                swapStatus: .available,
-                addedAt: Date()
-            ), viewModel: SwapBasketViewModel())
+                images: ["https://picsum.photos/300/200", "https://picsum.photos/300/200"],
+                storeLink: "https://store.com/luxury-handbag",
+                price: 249.99,
+                currency: "USD",
+                brand: "Designer Brand",
+                occasion: .birthday
+            ), viewModel: WishlistViewModel())
         }
     }
 }
+

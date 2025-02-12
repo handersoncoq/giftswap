@@ -11,10 +11,10 @@ import UserNotifications
 
 @MainActor
 class MarketplaceViewModel: ObservableObject {
-    @Published var gifts: [Gift] = []
+    @Published var gifts: [SwapGift] = []
     @Published var searchText: String = ""
-    @Published var displayedGifts: [Gift] = []
-    @Published var giftsByCategory: [GiftCategory: [Gift]] = [:]
+    @Published var displayedGifts: [SwapGift] = []
+    @Published var giftsByCategory: [GiftCategory: [SwapGift]] = [:]
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -22,7 +22,7 @@ class MarketplaceViewModel: ObservableObject {
         giftsByCategory.keys.sorted { $0.rawValue < $1.rawValue }
     }
 
-    var filteredGifts: [Gift] {
+    var filteredGifts: [SwapGift] {
         if searchText.isEmpty {
             return gifts
         } else {
@@ -33,7 +33,7 @@ class MarketplaceViewModel: ObservableObject {
         }
     }
 
-    var filteredGiftsByCategory: [GiftCategory: [Gift]] {
+    var filteredGiftsByCategory: [GiftCategory: [SwapGift]] {
         if searchText.isEmpty {
             return giftsByCategory
         } else {
@@ -67,7 +67,7 @@ class MarketplaceViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    func groupGiftsByCategory(_ gifts: [Gift]) {
+    func groupGiftsByCategory(_ gifts: [SwapGift]) {
         giftsByCategory = Dictionary(grouping: gifts, by: { $0.category })
     }
 

@@ -1,5 +1,5 @@
 //
-//  GiftService.swift
+//  SwapGiftService.swift
 //  GiftSwap
 //
 //  Created by Handerson COQ on 1/27/25.
@@ -8,15 +8,15 @@
 import Foundation
 import Combine
 
-class GiftService {
-    static let shared = GiftService() // Singleton instance
+class SwapGiftService {
+    static let shared = SwapGiftService() // Singleton instance
     private init() {}
 
     // Mock data for now
-    private var gifts: [Gift] = MockGifts.gifts
+    private var gifts: [SwapGift] = MockGifts.gifts
 
     // Fetch gifts with optional filters (availability, category, owner)
-    func fetchGifts(isAvailable: Bool? = nil, category: GiftCategory? = nil, ownerId: UUID? = nil) -> AnyPublisher<[Gift], Error> {
+    func fetchGifts(isAvailable: Bool? = nil, category: GiftCategory? = nil, ownerId: UUID? = nil) -> AnyPublisher<[SwapGift], Error> {
         var filteredGifts = gifts
 
         if let isAvailable = isAvailable {
@@ -38,7 +38,7 @@ class GiftService {
     }
 
     // Add a new gift (mock persistence)
-    func addGift(_ gift: Gift) -> AnyPublisher<Gift, Error> {
+    func addGift(_ gift: SwapGift) -> AnyPublisher<SwapGift, Error> {
         gifts.append(gift)
 
         return Just(gift)
@@ -48,7 +48,7 @@ class GiftService {
     }
 
     // Update a gift (mock persistence)
-    func updateGift(_ updatedGift: Gift) -> AnyPublisher<Gift, Error> {
+    func updateGift(_ updatedGift: SwapGift) -> AnyPublisher<SwapGift, Error> {
         if let index = gifts.firstIndex(where: { $0.id == updatedGift.id }) {
             gifts[index] = updatedGift
             return Just(updatedGift)

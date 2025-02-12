@@ -1,20 +1,21 @@
 //
-//  SwapBasketView.swift
+//  WishlistView.swift
 //  GiftSwap
 //
-//  Created by Handerson COQ on 2/8/25.
+//  Created by Handerson COQ on 2/10/25.
 //
 
 import SwiftUI
 import Combine
 
-struct SwapBasketView: View {
-    @StateObject private var viewModel = SwapBasketViewModel()
+struct WishGiftView: View {
+    @StateObject private var viewModel = WishlistViewModel()
     @State private var showConfirmation = false
-    @State private var giftToRemove: SwapGift?
+    @State private var giftToRemove: WishGift?
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var navigateToAddGift = false
+    @State private var navigateToCuratedGifts = false
     @State private var expandedCategories: Set<GiftCategory> = []
 
     var body: some View {
@@ -28,14 +29,15 @@ struct SwapBasketView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(.top, 50)
                 } else if viewModel.giftsByCategory.isEmpty {
-                    emptySwapBasketMessage
+                    emptyWishlistMessage
                 } else {
                     giftList
                 }
-                
+
                 Spacer()
-            }.onAppear {
-                viewModel.refreshSwapBasket()
+            }
+            .onAppear {
+                viewModel.refreshWishlist()
             }
             .padding(.horizontal)
             .navigationBarBackButtonHidden(true)
@@ -50,8 +52,12 @@ struct SwapBasketView: View {
                 removeGiftButton
                 cancelButton
             }
-        }.navigationDestination(isPresented: $navigateToAddGift) {
-            AddSwapGiftView()
+        }
+        .navigationDestination(isPresented: $navigateToAddGift) {
+            AddWishGiftView()
+        }
+        .navigationDestination(isPresented: $navigateToCuratedGifts) {
+            CuratedGifts()
         }
     }
 
@@ -59,7 +65,7 @@ struct SwapBasketView: View {
 
     private var titleView: some View {
         HStack {
-            Text("My Swap Basket")
+            Text("My Wish Gifts")
                 .font(.largeTitle)
                 .bold()
 
@@ -75,7 +81,6 @@ struct SwapBasketView: View {
         }
         .padding(.vertical)
     }
-
 
     private var searchBar: some View {
         HStack {
@@ -95,7 +100,6 @@ struct SwapBasketView: View {
         .padding(.bottom, 20)
     }
 
-
     private var giftList: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
@@ -105,26 +109,34 @@ struct SwapBasketView: View {
                     }
                 }
             }
+            .padding(.top, 20)
             .padding(.bottom, 50)
         }
     }
-    
-    private var emptySwapBasketMessage: some View {
+
+    private var emptyWishlistMessage: some View {
         VStack(spacing: 10) {
-            Text("Your swap basket is empty.")
+            Text("Your wishlist is empty.")
                 .font(.title3)
                 .bold()
                 .foregroundColor(.black.opacity(0.8))
             
-            Text("Consider adding gifts to your basket.")
+            Text("Consider adding gifts to your wishlist.")
                 .font(.body)
                 .foregroundColor(.black.opacity(0.7))
+            
+            Button(action: { navigateToCuratedGifts = true }) {
+                Text("Browse our curated gift list")
+                    .font(.body)
+                    .foregroundColor(Color.blue)
+                    .underline()
+            }
         }
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.top, 50)
     }
 
-    private func categorySection(category: GiftCategory, gifts: [SwapGift]) -> some View {
+    private func categorySection(category: GiftCategory, gifts: [WishGift]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text(category.rawValue.capitalized)
@@ -135,8 +147,8 @@ struct SwapBasketView: View {
 
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2), spacing: 12) {
                 ForEach(expandedCategories.contains(category) ? gifts : Array(gifts.prefix(4))) { gift in
-                    NavigationLink(destination: SwapGiftDetailView(gift: gift, viewModel: viewModel)) {
-                        SwapGiftCard(gift: gift, onRemove: {
+                    NavigationLink(destination: WishGiftDetailView(gift: gift, viewModel: viewModel)) {
+                        WishGiftCard(gift: gift, onRemove: {
                             giftToRemove = gift
                             showConfirmation = true
                         })
@@ -154,24 +166,24 @@ struct SwapBasketView: View {
                 }) {
                     Text(expandedCategories.contains(category) ? "View Less" : "Load More")
                         .font(.body)
-                        .foregroundColor(Color.blue).frame(maxWidth: .infinity, alignment: .center)
+                        .foregroundColor(Color.blue)
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
         }
     }
 
-
     // MARK: - Confirmation Dialog
 
     private var confirmationMessage: String {
-        "Are you sure you want to remove \(giftToRemove?.name ?? "") from your swap basket?"
+        "Are you sure you want to remove \(giftToRemove?.name ?? "") from your wishlist?"
     }
 
     private var removeGiftButton: some View {
         Button("Remove", role: .destructive) {
             if let gift = giftToRemove {
                 viewModel.removeGift(gift)
-                alertMessage = "Gift \"\(gift.name)\" has been removed from your swap basket."
+                alertMessage = "Gift \"\(gift.name)\" has been removed from your wishlist."
                 showAlert = true
             }
         }
@@ -185,5 +197,5 @@ struct SwapBasketView: View {
 
 // Preview
 #Preview {
-    SwapBasketView()
+    WishGiftView()
 }

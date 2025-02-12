@@ -18,7 +18,7 @@ class UserService {
     // Fetch all users
     func fetchUsers() -> AnyPublisher<[User], Error> {
         return Just(users)
-            .delay(for: .seconds(1), scheduler: RunLoop.main) // Simulate network delay
+            .delay(for: .seconds(1), scheduler: RunLoop.main) 
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
@@ -34,11 +34,17 @@ class UserService {
     }
     
     // Fetch user by email and password
-    func fetchUserByEmailAndPassword(email: String, password: String) -> AnyPublisher<User?, Error> {
-        let normalizedEmail = email.lowercased()
-
+    func fetchUserByUsernameAndPassword(username: String, password: String) -> AnyPublisher<User?, Error> {
+        let normalizedUsername = username.lowercased()
+        
         let user = users.first {
-            $0.email.lowercased() == normalizedEmail && $0.password == password
+            $0.email.lowercased() == normalizedUsername && $0.password == password
+        }
+
+        // Ensure login fails properly if user is nil
+        if user == nil {
+            return Fail(error: NSError(domain: "Authentication", code: 401, userInfo: [NSLocalizedDescriptionKey: "Invalid credentials"]))
+                .eraseToAnyPublisher()
         }
 
         return Just(user)

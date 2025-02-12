@@ -10,7 +10,7 @@ import Combine
 import SwiftUI
 
 class LoginViewModel: ObservableObject {
-    @Published var email: String = ""
+    @Published var username: String = ""
     @Published var password: String = ""
     @Published var isLoading: Bool = false
     @Published var loginError: String?
@@ -22,7 +22,7 @@ class LoginViewModel: ObservableObject {
         isLoading = true
         loginError = nil
 
-        AuthService.shared.login(email: email.lowercased(), password: password)
+        AuthService.shared.login(username: username.lowercased(), password: password)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 self.isLoading = false

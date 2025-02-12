@@ -35,7 +35,7 @@ struct HomeView: View {
                     .ignoresSafeArea()
                 }
             }.navigationDestination(isPresented: $navigateToAddGift) {
-                AddGiftView()
+                AddSwapGiftView()
             }
         }.environmentObject(navManager).navigationBarBackButtonHidden(true)
     }

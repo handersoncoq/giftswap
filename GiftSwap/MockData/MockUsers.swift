@@ -10,8 +10,8 @@ import Foundation
 struct MockUsers {
     static let users: [User] = [
         User(
-            name: "Anderson Smith",
-            email: "handerson.coq@gmail.com",
+            name: "Handerson Coq",
+            username: "thesh123",
             password: "password123",
             profilePictureURL: "https://randomuser.me/api/portraits/men/1.jpg",
             rating: 5.0,
@@ -19,7 +19,7 @@ struct MockUsers {
         ),
         User(
             name: "Emma Johnson",
-            email: "emma.johnson@example.com",
+            username: "emma001",
             password: "securepass",
             profilePictureURL: "https://randomuser.me/api/portraits/women/2.jpg",
             rating: 4.8,
@@ -27,7 +27,7 @@ struct MockUsers {
         ),
         User(
             name: "Michael Carter",
-            email: "michael.carter@example.com",
+            username: "michael.carter@example.com",
             password: "mikePass99",
             profilePictureURL: "https://randomuser.me/api/portraits/men/3.jpg",
             rating: 4.5,
@@ -35,7 +35,7 @@ struct MockUsers {
         ),
         User(
             name: "Sophia Martinez",
-            email: "sophia.martinez@example.com",
+            username: "sophia.martinez@example.com",
             password: "martinez2024",
             profilePictureURL: "https://randomuser.me/api/portraits/women/4.jpg",
             rating: 4.9,
@@ -43,7 +43,7 @@ struct MockUsers {
         ),
         User(
             name: "Liam Brown",
-            email: "liam.brown@example.com",
+            username: "liam.brown@example.com",
             password: "brownie007",
             profilePictureURL: "https://randomuser.me/api/portraits/men/5.jpg",
             rating: 4.7,
