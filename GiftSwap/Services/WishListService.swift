@@ -13,10 +13,10 @@ class WishlistService {
     private init() {}
 
     // Mock data for now
-    private var wishlists: [Wishlist] = MockWishlists.wishlists
+    private var wishlists: [Wishlist] = MockWishlists.initializedWishlists
 
     // Fetch all wishlists
-    func fetchWishlists() -> AnyPublisher<[Wishlist], Error> {
+    func fetchAllWishlists() -> AnyPublisher<[Wishlist], Error> {
         return Just(wishlists)
             .delay(for: .seconds(1), scheduler: RunLoop.main)
             .setFailureType(to: Error.self)
@@ -25,13 +25,17 @@ class WishlistService {
 
     // Fetch wishlists for a specific user
     func fetchWishlists(forUserId userId: UUID) -> AnyPublisher<[Wishlist], Error> {
-        let userWishlists = wishlists.filter { $0.userId == userId }
-
+        
+        let userWishlists = MockWishlists.mutableWishlists.filter { wishlist in
+            return wishlist.userId == userId
+        }
+        
         return Just(userWishlists)
             .delay(for: .seconds(1), scheduler: RunLoop.main)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
+
 
     // Fetch wishlists by category
     func fetchWishlists(byCategory category: WishlistCategory) -> AnyPublisher<[Wishlist], Error> {
@@ -46,7 +50,8 @@ class WishlistService {
     // Add a wishlist
     func addWishlist(_ wishlist: Wishlist) -> AnyPublisher<Wishlist, Error> {
         wishlists.append(wishlist)
-
+        MockWishlists.mutableWishlists.append(wishlist)
+        MockWishlists.refresh()
         return Just(wishlist)
             .delay(for: .seconds(1), scheduler: RunLoop.main)
             .setFailureType(to: Error.self)
@@ -65,23 +70,31 @@ class WishlistService {
             return Fail(error: NSError(domain: "WishlistService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Wishlist not found"]))
                 .eraseToAnyPublisher()
         }
+        
     }
 
     // Delete a wishlist
     func deleteWishlist(id: UUID) -> AnyPublisher<Bool, Error> {
+        // Remove from in-memory `wishlists`
         if let index = wishlists.firstIndex(where: { $0.id == id }) {
             wishlists.remove(at: index)
-            return Just(true)
-                .delay(for: .seconds(1), scheduler: RunLoop.main)
-                .setFailureType(to: Error.self)
-                .eraseToAnyPublisher()
+        }
+        
+        // Remove from `MockWishlists.mutableWishlists`
+        if let mockIndex = MockWishlists.mutableWishlists.firstIndex(where: { $0.id == id }) {
+            MockWishlists.mutableWishlists.remove(at: mockIndex)
         } else {
             return Fail(error: NSError(domain: "WishlistService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Wishlist not found"]))
                 .eraseToAnyPublisher()
         }
+
+        return Just(true)
+            .delay(for: .seconds(1), scheduler: RunLoop.main)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
     }
 
-    // **New Methods**
+
     
     // Fetch a specific wishlist
     func fetchWishlist(id: UUID) -> AnyPublisher<Wishlist?, Error> {

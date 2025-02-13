@@ -10,7 +10,7 @@ import Foundation
 struct User: Identifiable, Codable {
     var id: UUID
     var name: String
-    var email: String
+    var username: String
     var password: String
     var profilePictureURL: String?
     var rating: Double
@@ -38,7 +38,7 @@ struct User: Identifiable, Codable {
     ) {
         self.id = id
         self.name = name
-        self.email = username
+        self.username = username
         self.profilePictureURL = profilePictureURL
         self.rating = rating
         self.location = location

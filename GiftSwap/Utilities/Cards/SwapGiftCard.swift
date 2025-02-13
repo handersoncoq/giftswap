@@ -9,7 +9,8 @@ import SwiftUI
 
 struct SwapGiftCard: View {
     let gift: SwapGift
-    let onRemove: () -> Void
+    var onRemove: (() -> Void)? = nil
+    var isRemovable: Bool = true
     private let cardSize: CGFloat = 170
 
     var body: some View {
@@ -64,8 +65,7 @@ struct SwapGiftCard: View {
 
                     Spacer()
 
-                    // Remove button (only if status is not "pending")
-                    if gift.swapStatus != .pending {
+                    if gift.swapStatus != .pending, let onRemove = onRemove {
                         Button(action: onRemove) {
                             Image(systemName: "trash")
                                 .resizable()
@@ -103,7 +103,7 @@ struct SwapGiftCard_Previews: PreviewProvider {
                 ownerId: UUID(),
                 swapStatus: .available,
                 addedAt: Date()
-            ), onRemove: {print("Removed")})
+            ), onRemove: {print("remove")})
         }
         .previewLayout(.sizeThatFits)
     }

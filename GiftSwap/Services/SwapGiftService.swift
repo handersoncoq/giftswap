@@ -13,7 +13,11 @@ class SwapGiftService {
     private init() {}
 
     // Mock data for now
-    private var gifts: [SwapGift] = MockGifts.gifts
+    private var gifts: [SwapGift] {
+        get { MockSwapGifts.gifts }
+        set { MockSwapGifts.gifts = newValue }
+    }
+
 
     // Fetch gifts with optional filters (availability, category, owner)
     func fetchGifts(isAvailable: Bool? = nil, category: GiftCategory? = nil, ownerId: UUID? = nil) -> AnyPublisher<[SwapGift], Error> {
@@ -39,13 +43,23 @@ class SwapGiftService {
 
     // Add a new gift (mock persistence)
     func addGift(_ gift: SwapGift) -> AnyPublisher<SwapGift, Error> {
+        // Append to mock data
         gifts.append(gift)
+
+        // If the user has a swap basket, add the gift to it
+        if let userIndex = MockUsers.mutableUsers.firstIndex(where: { $0.id == gift.ownerId }) {
+            MockUsers.mutableUsers[userIndex].swapBasket?.append(SwapBasket(userId: gift.ownerId, giftId: gift.id, status: .available))
+        } else {
+            return Fail(error: NSError(domain: "SwapGiftService", code: 404, userInfo: [NSLocalizedDescriptionKey: "User not found"]))
+                .eraseToAnyPublisher()
+        }
 
         return Just(gift)
             .delay(for: .seconds(1), scheduler: RunLoop.main)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
+
 
     // Update a gift (mock persistence)
     func updateGift(_ updatedGift: SwapGift) -> AnyPublisher<SwapGift, Error> {
@@ -61,6 +75,7 @@ class SwapGiftService {
         }
     }
 
+
     // Delete a gift (mock persistence)
     func deleteGift(id: UUID) -> AnyPublisher<Bool, Error> {
         if let index = gifts.firstIndex(where: { $0.id == id }) {
@@ -74,5 +89,7 @@ class SwapGiftService {
                 .eraseToAnyPublisher()
         }
     }
+
+
 }
 

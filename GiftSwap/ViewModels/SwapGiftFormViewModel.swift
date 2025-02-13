@@ -15,13 +15,17 @@ class SwapGiftFormViewModel: ObservableObject {
     @Published var storeLink = ""
     @Published var selectedCategory: GiftCategory = .other
     
-    let imageManager: GiftImageManager // No @Published, managed by the View
+    let imageManager: GiftImageManager
+    private var cancellables = Set<AnyCancellable>()
 
     init(imageManager: GiftImageManager) {
         self.imageManager = imageManager
     }
 
     func addGiftToSwapBasket() -> String? {
+        guard let userId = AuthService.shared.currentUser?.id else {
+            return "User must be logged in to add a gift."
+        }
         guard !giftName.isEmpty else { return "Gift name is required." }
         guard !giftDescription.isEmpty else { return "Gift description is required." }
         guard let value = Double(giftValue), value > 0 else { return "Valid gift value is required." }
@@ -35,23 +39,27 @@ class SwapGiftFormViewModel: ObservableObject {
             isAvailable: true,
             storeLink: storeLink.isEmpty ? nil : storeLink,
             category: selectedCategory,
-            ownerId: UUID(),
+            ownerId: userId,
             swapStatus: .available,
             addedAt: Date()
         )
 
-        // Add the new gift to GiftService
-        _ = SwapGiftService.shared.addGift(newGift)
-        
-        // Create a SwapBasket entry for the new gift
-        let newSwapBasketItem = SwapBasket(
-            userId: newGift.ownerId,
-            giftId: newGift.id,
-            status: .available
-        )
-        
-        // Add to SwapBasketService
-        SwapBasketService.shared.addGiftToSwapBasket(newSwapBasketItem)
+        SwapGiftService.shared.addGift(newGift)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    print("Error adding swap gift: \(error.localizedDescription)")
+                }
+            }, receiveValue: { addedGift in
+                let newSwapBasketItem = SwapBasket(
+                    userId: addedGift.ownerId,
+                    giftId: addedGift.id,
+                    status: .available
+                )
+
+                SwapBasketService.shared.addGiftToSwapBasket(newSwapBasketItem)
+            })
+            .store(in: &cancellables)
 
         return nil
     }
@@ -60,3 +68,4 @@ class SwapGiftFormViewModel: ObservableObject {
         imageManager.removeImage(id)
     }
 }
+

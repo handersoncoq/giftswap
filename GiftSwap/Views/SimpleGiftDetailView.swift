@@ -1,15 +1,15 @@
 //
-//  SwapGiftDetailView.swift
+//  SimpleGiftDetailView.swift
 //  GiftSwap
 //
-//  Created by Handerson COQ on 2/8/25.
+//  Created by Handerson COQ on 2/13/25.
 //
 
 import SwiftUI
 import Combine
 
 
-struct SwapGiftDetailView: View {
+struct SimpleGiftDetailView: View {
     let gift: SwapGift
     @ObservedObject var viewModel: SwapBasketViewModel
     @State private var currentIndex: Int = 0
@@ -17,81 +17,52 @@ struct SwapGiftDetailView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var giftOwner: String = "Loading..."
+
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
-        MainLayoutView(isRootView: false) {
+        
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    GiftImageCarousel(gift: gift, currentIndex: $currentIndex)
-                    GiftDetails(gift: gift)
-                    HStack(spacing: 30){
-                    SwapStatusView(status: gift.swapStatus)
+                    SimpleGiftImageCarousel(gift: gift, currentIndex: $currentIndex)
+                    SimpleGiftDetails(gift: gift)
+                    
                     VStack(alignment: .leading) {
-                        HStack {
-                            Image(systemName: "person.fill").foregroundColor(.appPrimary).padding(.top, -3)
-                            Text("@\(giftOwner)")
-                                .font(.caption)
-                                .foregroundColor(Color.secondary)
-                        }
-                    }}
+                        HStack(spacing: 25){
+                        SwapStatusView(status: gift.swapStatus)
+                        VStack(alignment: .leading) {
+                            HStack {
+                                Image(systemName: "person.fill").foregroundColor(.appPrimary).padding(.top, -3)
+                                Text("@\(giftOwner)")
+                                    .font(.caption)
+                                    .foregroundColor(Color.secondary)
+                            }
+                        }}
+                    }
                     .onAppear {
                         viewModel.getGiftOwner(gift: gift) { ownerName in
                             giftOwner = ownerName
                         }
                     }
-                    RemoveGiftButton(gift: gift)
+
+                   
                 }
                 .padding()
-            }
-            .navigationBarBackButtonHidden(true)
+            }.padding(.vertical, 45).background(Color.appPrimary.opacity(0.05))
             .alert(alertMessage, isPresented: $showAlert) {
                 Button("OK", role: .cancel) { }
             }
-            .confirmationDialog("Are you sure you want to remove \(gift.name) from your swap basket?", isPresented: $showConfirmation, titleVisibility: .visible) {
-                Button("Remove", role: .destructive) {
-                    removeGiftFromSwapBasket()
-                }
-                Button("Cancel", role: .cancel) { }
-            }
-        }
+        
     }
 
-    // Remove gift button
-    @ViewBuilder
-    private func RemoveGiftButton(gift: SwapGift) -> some View {
-        if(AuthService.shared.currentUser?.id == gift.ownerId){
-            CTAButton(
-                label: "Remove from Swap Basket",
-                backgroundColor: .red,
-                action: {
-                    if gift.swapStatus == .pending {
-                        alertMessage = "This gift's swap status is currently pending and cannot be removed."
-                        showAlert = true
-                    } else {
-                        showConfirmation = true
-                    }
-                },
-                icon: Image(systemName: "trash")
-            )
-            .padding(.bottom, 45)
-            .padding(.top, 8)
-        }
-    }
 
-    // Remove Gift
-    private func removeGiftFromSwapBasket() {
-        viewModel.removeGift(gift)
-        alertMessage = "Gift \"\(gift.name)\" has been removed from your swap basket."
-        showAlert = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            presentationMode.wrappedValue.dismiss()
-        }
-    }
 }
 
+// get gift's owner
+
+
 // Gift Images
-struct GiftImageCarousel: View {
+struct SimpleGiftImageCarousel: View {
     let gift: SwapGift
     @Binding var currentIndex: Int
 
@@ -107,7 +78,7 @@ struct GiftImageCarousel: View {
                             case .success(let image):
                                 image.resizable().frame(maxWidth: 450, maxHeight: 270).cornerRadius(16)
                             case .failure:
-                                PlaceholderView().frame(height: 300)
+                                SimpleSimpleSimpleGiftImageCarousel().frame(height: 300)
                             @unknown default:
                                 EmptyView()
                             }
@@ -129,13 +100,13 @@ struct GiftImageCarousel: View {
             }
             .padding(.bottom, 30)
         } else {
-            PlaceholderView().frame(height: 300)
+            SimpleSimpleSimpleGiftImageCarousel().frame(height: 300)
         }
     }
 }
 
 // Gift Details
-struct GiftDetails: View {
+struct SimpleGiftDetails: View {
     let gift: SwapGift
 
     var body: some View {
@@ -151,7 +122,7 @@ struct GiftDetails: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
 
-            HStack(spacing: 18){
+            HStack(spacing: 18) {
                 Text("Value: $\(gift.value, specifier: "%.2f")")
                     .font(.body)
                     .foregroundColor(Color.blue)
@@ -167,7 +138,7 @@ struct GiftDetails: View {
 }
 
 // Placeholder Image
-struct PlaceholderView: View {
+struct SimpleSimpleSimpleGiftImageCarousel: View {
     var body: some View {
         RoundedRectangle(cornerRadius: 16)
             .fill(Color.white)
@@ -191,10 +162,10 @@ struct PlaceholderView: View {
 
 
 // Preview
-struct SwapGiftDetailView_Previews: PreviewProvider {
+struct SimpleGiftDetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            SwapGiftDetailView(gift: MockSwapGifts.gifts[0], viewModel: SwapBasketViewModel())
+            SimpleGiftDetailView(gift: MockSwapGifts.gifts[0], viewModel: SwapBasketViewModel())
         }
     }
 }

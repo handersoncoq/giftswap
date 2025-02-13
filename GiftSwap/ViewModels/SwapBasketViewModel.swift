@@ -18,27 +18,37 @@ class SwapBasketViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init() {
-        fetchSwapBasketGifts()
+        fetchUserSwapBasketGifts()
+        NotificationCenter.default.addObserver(self, selector: #selector(refreshSwapBasket), name: NSNotification.Name("RefreshSwapBasket"), object: nil)
     }
+    
+    // Fetch ONLY the current user's swap basket gifts
+        func fetchUserSwapBasketGifts() {
+            guard let currentUser = AuthService.shared.currentUser else {
+                print("No logged-in user found.")
+                return
+            }
 
-    func fetchSwapBasketGifts() {
-        SwapBasketService.shared.fetchAllGiftsInSwapBaskets()
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { completion in
-                if case .failure(let error) = completion {
-                    print("Error fetching swap basket gifts: \(error.localizedDescription)")
-                }
-            }, receiveValue: { fetchedGifts in
-                // Keep only gifts that are available for swapping
-                let marketplaceGifts = fetchedGifts.filter { $0.swapStatus == .available }
+            isLoading = true
+            print("Fetching swap gifts for user ID: \(currentUser.id)")
 
-                // Group them by category
-                self.allGiftsByCategory = Dictionary(grouping: marketplaceGifts, by: { $0.category })
-                
-                self.filterGifts()
-            })
-            .store(in: &cancellables)
-    }
+            SwapBasketService.shared.fetchUserSwapBasketGifts(userId: currentUser.id)
+                .receive(on: DispatchQueue.main)
+                .sink(receiveCompletion: { completion in
+                    self.isLoading = false
+                    if case .failure(let error) = completion {
+                        print("Error fetching user swap gifts: \(error.localizedDescription)")
+                    }
+                }, receiveValue: { fetchedGifts in
+                    print("Fetched \(fetchedGifts.count) swap gifts for user ID: \(currentUser.id)")
+
+                    // Group them by category
+                    self.allGiftsByCategory = Dictionary(grouping: fetchedGifts, by: { $0.category })
+                    self.filterGifts()
+                })
+                .store(in: &cancellables)
+        }
+
 
 
     func removeGift(_ gift: SwapGift) {
@@ -57,24 +67,39 @@ class SwapBasketViewModel: ObservableObject {
     }
     
     func filterGifts() {
-        if searchText.isEmpty {
-            giftsByCategory = allGiftsByCategory
-        } else {
-            giftsByCategory = allGiftsByCategory.mapValues { gifts in
-                gifts.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
-            }.filter { !$0.value.isEmpty }
+            if searchText.isEmpty {
+                giftsByCategory = allGiftsByCategory
+            } else {
+                giftsByCategory = allGiftsByCategory.mapValues { gifts in
+                    gifts.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+                }.filter { !$0.value.isEmpty }
+            }
         }
-    }
 
 
     
     // Refresh wishlist
-    func refreshSwapBasket() {
+    @objc func refreshSwapBasket() {
         isLoading = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            self.fetchSwapBasketGifts()
-            self.isLoading = false
+            self.fetchUserSwapBasketGifts()
         }
     }
+    
+    
+    func getGiftOwner(gift: SwapGift, completion: @escaping (String) -> Void) {
+        UserService.shared.fetchUser(byGiftId: gift.id)
+            .sink(receiveCompletion: { result in
+                if case .failure(let error) = result {
+                    print("Error fetching user: \(error.localizedDescription)")
+                    completion("Unknown Owner")
+                }
+            }, receiveValue: { user in
+                completion(user?.username ?? "Unknown Owner")
+            })
+            .store(in: &cancellables)
+    }
+
+
 
 }

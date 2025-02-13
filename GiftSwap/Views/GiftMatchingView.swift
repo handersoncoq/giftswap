@@ -9,11 +9,15 @@ import SwiftUI
 import Combine
 
 struct GiftMatchingView: View {
+    @ObservedObject var authService = AuthService.shared
     @Binding var isPresented: Bool
     @State private var statusText: String = "Looking into your swap basket..."
     @State private var showMatchResult = false
-    @State private var matchedGift: SwapGift?
+    @State private var matchedPair: (SwapGift, SwapGift)?
     @State private var cancellables = Set<AnyCancellable>()
+    @State private var navigateToSwapGiftDetail = false
+    @State private var selectedGift: SwapGift?
+    @State private var showCancelButton = true
     
     var body: some View {
         VStack(spacing: 20) {
@@ -39,6 +43,13 @@ struct GiftMatchingView: View {
                     .foregroundColor(Color("App_Primary"))
             }
             
+            if let matchedGift = selectedGift {
+                NavigationLink(value: matchedGift) {
+                    Text("View Matched Gift")
+                }
+            }
+
+            
             // Status Updates
             Text(statusText)
                 .font(.body)
@@ -47,21 +58,38 @@ struct GiftMatchingView: View {
             
             Spacer()
             
+            if showCancelButton {
+                cancelButton(action: {
+                    isPresented = false
+                }, label: "Cancel")
+            }
+            
+            
             if showMatchResult {
-                if let gift = matchedGift {
-                    matchFoundView(gift: gift)
+                if let matchedPair = matchedPair {
+                    matchFoundView(userGift: matchedPair.0, matchedGift: matchedPair.1)
                 } else {
                     noMatchView()
                 }
             }
+        }.navigationDestination(for: SwapGift.self) { gift in
+            SimpleGiftDetailView(gift: gift, viewModel: SwapBasketViewModel())
         }
+
         .padding()
         .onAppear {
             startMatchingProcess()
         }
+        FooterView()
     }
     
+    
     private func startMatchingProcess() {
+        guard let currentUser = authService.currentUser else {
+            print("No logged-in user")
+            return
+        }
+        
         // Simulating the status updates
         let statuses = [
             "Looking into your swap basket...",
@@ -77,56 +105,93 @@ struct GiftMatchingView: View {
         
         // Simulating matching result after 4 seconds
         DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-            GiftMatchingService.shared.startMatchingProcess(for: UUID())
-                .sink(receiveCompletion: { _ in }, receiveValue: { matchedGift in
-                    self.matchedGift = matchedGift
+            GiftMatchingService.shared.startMatchingProcess(for: currentUser.id)
+                .sink(receiveCompletion: { _ in }, receiveValue: { matchedPair in
+                    self.matchedPair = matchedPair
                     self.showMatchResult = true
+                    self.showCancelButton = false
                 })
                 .store(in: &cancellables)
         }
     }
     
-    private func matchFoundView(gift: SwapGift) -> some View {
+    
+    private func matchFoundView(userGift: SwapGift, matchedGift: SwapGift) -> some View {
         VStack {
-            Text("Match Found!")
+            Spacer()
+            Text("We've found a match!")
                 .font(.headline)
                 .foregroundColor(Color("App_Primary"))
+                .padding(.vertical)
+                .padding(.top, -25)
             
-            SwapGiftDetailView(gift: gift, viewModel: SwapBasketViewModel())
-                .frame(height: 250)
-
+            // Gifts Displayed Side by Side
+            HStack(spacing: 4) {
+                VStack {
+                    Button(action: {
+                        selectedGift = userGift
+                        navigateToSwapGiftDetail = true
+                    }) {
+                        SwapGiftCard(gift: userGift)
+                    }
+                }
+                
+                VStack {
+                    Image(systemName: "arrow.right")
+                        .font(.body)
+                        .foregroundColor(Color.appPrimary)
+                    Image(systemName: "arrow.left")
+                        .font(.body)
+                        .foregroundColor(Color.appPrimary)
+                }
+                
+                VStack {
+                    Button(action: {
+                        selectedGift = matchedGift
+                        navigateToSwapGiftDetail = true
+                    }) {
+                        SwapGiftCard(gift: matchedGift)
+                    }
+                }
+            }
+            .padding(.vertical)
+            
+            Spacer()
+            
             HStack {
-                Button(action: { confirmSwap(for: gift) }) {
+                Button(action: { confirmSwap(for: matchedGift) }) {
                     Text("Confirm Swap")
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.green)
+                        .background(Color.appPrimary)
                         .foregroundColor(.white)
                         .cornerRadius(8)
                 }
                 
-                Button(action: { rejectSwap() }) {
-                    Text("Reject Swap")
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
+                cancelButton(action: { rejectSwap() }, label: "Reject Swap")
             }
+            .padding(.top, 45)
+            
+            Spacer()
+        }
+        .padding(.vertical)
+        .navigationDestination(item: $selectedGift) { gift in
+            SimpleGiftDetailView(gift: gift, viewModel: SwapBasketViewModel())
         }
     }
     
-    private func noMatchView() -> some View {
-        VStack {
-            Text("Sorry, no match found at this time.")
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding()
-            
-            Button(action: { isPresented = false }) {
-                Text("Dismiss")
+    
+    private func matchFound(gift: SwapGift) {
+        selectedGift = gift
+        navigateToSwapGiftDetail = true
+        isPresented = false
+    }
+    
+    
+    private func cancelButton(action: () -> Void, label: String) -> some View {
+        VStack{
+            Button(action: { rejectSwap() }) {
+                Text(label)
                     .padding()
                     .frame(maxWidth: .infinity)
                     .background(Color.gray)
@@ -136,20 +201,47 @@ struct GiftMatchingView: View {
         }
     }
     
+    
+    private func noMatchView() -> some View {
+        VStack {
+            Spacer()
+            VStack{
+                Text("Sorry, no match found at this time.")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                Image(systemName: "xmark.circle")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 23, height: 23)
+                    .foregroundColor(Color.red.opacity(0.6))
+            }.padding(.top, -25)
+            Spacer()
+            
+            Button(action: { isPresented = false }) {
+                Text("Dismiss")
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            }.padding(.bottom)
+        }
+    }
+    
     private func confirmSwap(for gift: SwapGift) {
         // Update swap status to pending
         SwapBasketService.shared.updateSwapStatus(for: gift.id, to: .pending)
-
+        
         // Notify the other user
         NotificationService.shared.sendNotification(
             to: gift.ownerId,
             message: "You have received a swap request for '\(gift.name)'. Please review the request."
         )
-
+        
         // Dismiss the sheet
         isPresented = false
     }
-
     
     private func rejectSwap() {
         isPresented = false
@@ -158,22 +250,32 @@ struct GiftMatchingView: View {
 
 // Placeholder animation
 struct DotsLoadingAnimation: View {
-    @State private var isAnimating = false
+    @State private var offsetX: CGFloat = -3
     
     var body: some View {
-        HStack {
-            Circle().frame(width: 8, height: 8).foregroundColor(.gray)
-            Circle().frame(width: 8, height: 8).foregroundColor(.gray)
-            Circle().frame(width: 8, height: 8).foregroundColor(.gray)
+        HStack(spacing: 8) {
+            Circle()
+                .frame(width: 8, height: 8)
+                .foregroundColor(.gray).opacity(0.3)
+                .offset(x: offsetX)
+            Circle()
+                .frame(width: 8, height: 8)
+                .foregroundColor(.gray).opacity(0.3)
+            Circle()
+                .frame(width: 8, height: 8)
+                .foregroundColor(.gray).opacity(0.3)
+                .offset(x: -offsetX)
         }
-        .opacity(isAnimating ? 1 : 0.3)
-        .animation(Animation.easeInOut(duration: 0.8).repeatForever(), value: isAnimating)
         .onAppear {
-            isAnimating = true
+            withAnimation(Animation.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                offsetX = 3
+            }
         }
     }
 }
 
-// #Preview {
-//    GiftMatchingView(isPresented: .constant(true))
-//}
+
+#Preview {
+    GiftMatchingView(isPresented: .constant(true))
+}
+

@@ -8,7 +8,8 @@
 import Foundation
 
 struct MockSwapBaskets {
-    static let swapBaskets: [SwapBasket] = MockGifts.gifts.map { gift in
-        SwapBasket(userId: UUID(), giftId: gift.id, status: .available)
+    static var swapBaskets: [SwapBasket] = MockSwapGifts.gifts.map { gift in
+        SwapBasket(userId: gift.ownerId, giftId: gift.id, status: .available)
     }
 }
+

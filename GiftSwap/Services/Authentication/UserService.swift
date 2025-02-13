@@ -13,7 +13,7 @@ class UserService {
     private init() {}
 
     // Mock data for now
-    private var users: [User] = MockUsers.users
+    private var users: [User] = MockUsers.initializedUsers
 
     // Fetch all users
     func fetchUsers() -> AnyPublisher<[User], Error> {
@@ -24,21 +24,42 @@ class UserService {
     }
 
     // Fetch user by ID
-    func fetchUser(byId id: UUID) -> AnyPublisher<User?, Error> {
-        let user = users.first { $0.id == id }
-
-        return Just(user)
-            .delay(for: .seconds(1), scheduler: RunLoop.main)
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
+    func fetchUser(byId userId: UUID) -> AnyPublisher<User?, Error> {
+        if let user = MockUsers.initializedUsers.first(where: { $0.id == userId }) {
+            print("Fecthing user: \(user)")
+            return Just(user)
+                .setFailureType(to: Error.self)
+                .eraseToAnyPublisher()
+        } else {
+            return Fail(error: NSError(domain: "UserService", code: 404, userInfo: [NSLocalizedDescriptionKey: "User not found"]))
+                .eraseToAnyPublisher()
+        }
     }
+    
+    // Fetch user by SwapGift ID
+    func fetchUser(byGiftId giftId: UUID) -> AnyPublisher<User?, Error> {
+        if let user = MockUsers.initializedUsers.first(where: { user in
+            user.swapBasket?.contains(where: { $0.giftId == giftId }) ?? false
+        }) {
+            print("Fetching user: \(user)")
+            return Just(user)
+                .setFailureType(to: Error.self)
+                .eraseToAnyPublisher()
+        } else {
+            return Fail(error: NSError(domain: "UserService", code: 404, userInfo: [NSLocalizedDescriptionKey: "User not found"]))
+                .eraseToAnyPublisher()
+        }
+    }
+
+
+
     
     // Fetch user by email and password
     func fetchUserByUsernameAndPassword(username: String, password: String) -> AnyPublisher<User?, Error> {
         let normalizedUsername = username.lowercased()
         
         let user = users.first {
-            $0.email.lowercased() == normalizedUsername && $0.password == password
+            $0.username.lowercased() == normalizedUsername && $0.password == password
         }
 
         // Ensure login fails properly if user is nil

@@ -23,11 +23,10 @@ struct EditWishlistView: View {
                 Text("Edit Wishlist")
                     .font(.largeTitle)
                     .bold()
-                    .padding(.bottom, 10)
 
                 AppTextField(placeholder: "Wishlist Name*", text: $viewModel.name)
 
-                AppTextField(placeholder: "Description", text: $viewModel.description, isMultiline: true)
+                AppTextField(placeholder: "Description*", text: $viewModel.description, isMultiline: true)
 
                 Toggle(isOn: $viewModel.isPrivate) {
                     Text("Private Wishlist")
@@ -59,7 +58,8 @@ struct EditWishlistView: View {
                 }
             }
             .navigationBarBackButtonHidden(true)
-            .padding()
+            .padding(.horizontal)
+            .padding(.top, -50)
             .alert(alertMessage, isPresented: $showAlert) {
                 Button("OK", role: .cancel) { }
             }
@@ -79,7 +79,7 @@ struct EditWishlistView: View {
 // Preview
 #Preview {
     EditWishlistView(wishlist: Wishlist(
-        userId: MockUsers.users[1].id,
+        userId: MockUsers.initializedUsers[1].id,
         name: "My Christmas Wishlist",
         description: "My dream Christmas gifts!",
         isPrivate: true,

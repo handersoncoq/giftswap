@@ -12,6 +12,7 @@ import SwiftUI
 class AuthService: ObservableObject {
     static let shared = AuthService()
     @Published var currentUser: User?
+//     @Published var currentUser: User? = MockUsers.initializedUsers.first
     @Published var isLoggingOut: Bool = false
     private var cancellables = Set<AnyCancellable>()
     @AppStorage("isAuthenticated") private var isAuthenticated: Bool = false

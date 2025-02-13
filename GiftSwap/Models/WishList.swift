@@ -15,6 +15,7 @@ struct Wishlist: Identifiable, Codable {
     var isPrivate: Bool
     var isActive: Bool
     var category: WishlistCategory
+    var wishGifts: [WishGift]?
     var addedAt: Date
     
     init(
@@ -25,6 +26,7 @@ struct Wishlist: Identifiable, Codable {
         isPrivate: Bool = false,
         isActive: Bool = true,
         category: WishlistCategory = .other,
+        wishGifts: [WishGift]? = nil,
         addedAt: Date = Date()
     ) {
         self.id = id
@@ -34,6 +36,7 @@ struct Wishlist: Identifiable, Codable {
         self.isPrivate = isPrivate
         self.isActive = isActive
         self.category = category
+        self.wishGifts = wishGifts
         self.addedAt = addedAt
     }
 }

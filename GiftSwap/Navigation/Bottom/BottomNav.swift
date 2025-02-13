@@ -49,7 +49,9 @@ struct BottomNav: View {
             WishlistView()
         }
         .sheet(isPresented: $showGiftMatching) {
-            GiftMatchingView(isPresented: $showGiftMatching)
+            NavigationStack{
+                GiftMatchingView(isPresented: $showGiftMatching)
+            }
         }
     }
 
@@ -58,7 +60,7 @@ struct BottomNav: View {
             Circle()
                 .frame(width: 72, height: 72)
                 .foregroundColor(Color("App_Primary"))
-                .shadow(radius: 6, x: 0, y: 5)
+                .shadow(radius: isAnimating ? 2 : 6, x: 0, y: isAnimating ? 3 : 5)
 
             Button(action: {
                 isAnimating = true
@@ -70,7 +72,7 @@ struct BottomNav: View {
                 Image(systemName: "arrow.2.circlepath")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(.white)
-                    .rotationEffect(.degrees(isAnimating ? 360 : 0)) // Animation
+                    .rotationEffect(.degrees(isAnimating ? 360 : 0))
                     .animation(.easeInOut(duration: 0.6), value: isAnimating)
                     .frame(width: 60, height: 60)
                     .background(Color("App_Primary"))

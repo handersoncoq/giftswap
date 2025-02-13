@@ -35,9 +35,9 @@ struct WishlistCard: View {
                         .truncationMode(.tail)
                 }
 
-                Text(wishlist.category.rawValue.capitalized)
+                Text("#\(wishlist.category.rawValue)")
                     .font(.footnote)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.appPrimary)
             }
 
             Spacer()

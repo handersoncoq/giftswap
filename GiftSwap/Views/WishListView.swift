@@ -9,38 +9,49 @@ import SwiftUI
 
 struct WishlistView: View {
     @StateObject private var viewModel = WishlistViewModel()
-    @State private var showAddWishlist = false
+    @State private var navigateToAddWishlist = false
     @State private var wishlistToRemove: Wishlist?
     @State private var showConfirmation = false
 
     var body: some View {
         MainLayoutView(isRootView: false) {
-            VStack(alignment: .leading) {
-                titleView
-                searchBar
+            GeometryReader { geometry in
+                VStack(alignment: .leading) {
+                    titleView
+                    searchBar
 
-                if viewModel.isLoading {
-                    ProgressView()
+                    if viewModel.isLoading {
+                        ProgressView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding(.top, 50)
+                    } else if viewModel.wishlistsByCategory.isEmpty {
+                        VStack {
+                            Spacer(minLength: geometry.size.height * 0.15)
+                            emptyMessage
+                            Spacer()
+                        }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .padding(.top, 50)
-                } else if viewModel.wishlistsByCategory.isEmpty {
-                    emptyMessage
-                } else {
-                    wishlistList
-                }
-            }
-            .padding(.horizontal)
-            .navigationBarBackButtonHidden(true)
-            .alert("Are you sure you want to delete this wishlist?", isPresented: $showConfirmation) {
-                Button("Delete", role: .destructive) {
-                    if let wishlist = wishlistToRemove {
-                        viewModel.removeWishlist(wishlist)
+                    } else {
+                        wishlistList
                     }
                 }
-                Button("Cancel", role: .cancel) { }
+                .padding(.horizontal)
+                .navigationBarBackButtonHidden(true)
+                .alert("Are you sure you want to delete this wishlist?", isPresented: $showConfirmation) {
+                    Button("Delete", role: .destructive) {
+                        if let wishlist = wishlistToRemove {
+                            viewModel.removeWishlist(wishlist)
+                        }
+                    }
+                    Button("Cancel", role: .cancel) { }
+                }
             }
+        }.onAppear { viewModel.fetchUserWishlists() }
+        .navigationDestination(isPresented: $navigateToAddWishlist) {
+            AddWishListView()
         }
     }
+
 
     private var titleView: some View {
         HStack {
@@ -50,7 +61,7 @@ struct WishlistView: View {
 
             Spacer()
 
-            Button(action: { showAddWishlist = true }) {
+            Button(action: { navigateToAddWishlist = true }) {
                 Image(systemName: "plus")
                     .font(.title)
                     .frame(width: 40, height: 40)
@@ -82,7 +93,7 @@ struct WishlistView: View {
             VStack(alignment: .leading, spacing: 16) {
                 ForEach(viewModel.wishlistsByCategory.keys.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { category in
                     if let wishlists = viewModel.wishlistsByCategory[category] {
-                        Section(header: Text(category.rawValue.capitalized).font(.headline).bold()) {
+                        Section(header: Text("#\(category.rawValue)").font(.title)) {
                             ForEach(wishlists) { wishlist in
                                 NavigationLink(destination: WishListDetailView(wishlist: wishlist)) {
                                     WishlistCard(
@@ -91,18 +102,17 @@ struct WishlistView: View {
                                             wishlistToRemove = wishlist
                                             showConfirmation = true
                                         }
-                                    )
-                                    .padding(.horizontal)
+                                    ).padding(.top, -20)
+
                                 }
                             }
-                        }
+                        }.padding(.bottom, 25)
                     }
                 }
             }
             .padding(.bottom, 50)
         }
     }
-
 
     private var emptyMessage: some View {
         VStack(spacing: 10) {
@@ -116,10 +126,10 @@ struct WishlistView: View {
                 .foregroundColor(.black.opacity(0.7))
         }
         .frame(maxWidth: .infinity, alignment: .center)
-        .padding(.top, 50)
+        .padding(.top, -60)
     }
-    
 }
+
 
 #Preview {
     WishlistView()

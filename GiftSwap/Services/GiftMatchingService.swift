@@ -15,71 +15,39 @@ class GiftMatchingService {
     private var cancellables = Set<AnyCancellable>()
 
     // Finds a match for a given gift in the swap basket
-    func findMatch(for gift: SwapGift, userId: UUID) -> AnyPublisher<SwapGift?, Error> {
-        return Future<SwapGift?, Error> { promise in
-            // Step 1: Fetch ALL wishlists for this user
-            WishlistService.shared.fetchWishlists(forUserId: userId)
-                .map { wishlists in
-                    return wishlists.flatMap { wishlist in
-                        // Convert wishlist names into gift lookup
-                        MockGifts.gifts.filter { gift in
-                            wishlist.name.localizedCaseInsensitiveContains(gift.name) // Mock filtering
-                        }
-                    }
-                }
-                .flatMap { wishlistGifts -> AnyPublisher<SwapGift?, Error> in
-                    // Step 2: Fetch all gifts in swap baskets
-                    SwapBasketService.shared.fetchAllGiftsInSwapBaskets()
-                        .map { swapGifts in
-                            return self.findMatchingGift(
-                                gift: gift,
-                                wishlistGifts: wishlistGifts,
-                                swapGifts: swapGifts
-                            )
-                        }
-                        .eraseToAnyPublisher()
-                }
-                .sink(receiveCompletion: { completion in
-                    if case .failure(let error) = completion {
-                        promise(.failure(error))
-                    }
-                }, receiveValue: { matchedGift in
-                    promise(.success(matchedGift))
-                })
-                .store(in: &self.cancellables)
-        }
-        .eraseToAnyPublisher()
+    func findMatch(for gift: SwapGift, userId: UUID) -> AnyPublisher<(SwapGift, SwapGift)?, Error> {
+        return SwapGiftService.shared.fetchGifts(isAvailable: true)
+            .map { swapGifts in
+                // Ensure we do not match the user's own swap gifts
+                let availableGifts = swapGifts.filter { $0.ownerId != userId }
+                return self.findMatchingGift(gift: gift, swapGifts: availableGifts)
+            }
+            .eraseToAnyPublisher()
     }
 
     // Finds a matching gift based on multiple criteria
-    private func findMatchingGift(gift: SwapGift, wishlistGifts: [SwapGift], swapGifts: [SwapGift]) -> SwapGift? {
-        // Exact Name Match
-        if let match = wishlistGifts.first(where: { $0.name.lowercased() == gift.name.lowercased() }) {
-            return match
+    private func findMatchingGift(gift: SwapGift, swapGifts: [SwapGift]) -> (SwapGift, SwapGift)? {
+        // 1️⃣ Exact Name Match
+        if let match = swapGifts.first(where: { $0.name.lowercased() == gift.name.lowercased() }) {
+            return (gift, match)
         }
-        
-        // Description Similarity (Basic Text Matching for Now)
+
+        // 2️⃣ Description Similarity Match
         if let match = swapGifts.first(where: { self.isDescriptionSimilar(gift.description, $0.description) }) {
-            return match
+            return (gift, match)
         }
 
-        // Category-Based Match
-        if let match = swapGifts.first(where: { $0.category == gift.category && $0.ownerId != gift.ownerId }) {
-            return match
+        // 3️⃣ Category-Based Match
+        if let match = swapGifts.first(where: { $0.category == gift.category }) {
+            return (gift, match)
         }
 
-        // Value-Based Match (Within 20% Price Range)**
+        // 4️⃣ Value-Based Match (Within 20% Price Range)
         if let match = swapGifts.first(where: {
-            $0.ownerId != gift.ownerId && abs($0.value - gift.value) / gift.value <= 0.2
+            abs($0.value - gift.value) / gift.value <= 0.2
         }) {
-            return match
+            return (gift, match)
         }
-
-        // User Wishlist vs. Other Swap Baskets
-        if let match = swapGifts.first(where: { _ in wishlistGifts.contains(where: { $0.name.lowercased() == $0.name.lowercased() }) }) {
-            return match
-        }
-
 
         return nil // No match found
     }
@@ -92,18 +60,18 @@ class GiftMatchingService {
         return commonWords.count >= 3 // Match if at least 3 words overlap
     }
     
-    // Start the process
-    func startMatchingProcess(for userId: UUID) -> AnyPublisher<SwapGift?, Error> {
-        return SwapBasketService.shared.fetchAllGiftsInSwapBaskets()
-            .flatMap { gifts -> AnyPublisher<SwapGift?, Error> in
-                if let gift = gifts.first(where: { $0.ownerId == userId }) {
-                    return self.findMatch(for: gift, userId: userId)
+    // Start the matching process for a user
+    func startMatchingProcess(for userId: UUID) -> AnyPublisher<(SwapGift, SwapGift)?, Error> {
+        return SwapBasketService.shared.fetchUserSwapBasketGifts(userId: userId)
+            .flatMap { userSwapGifts in
+                guard let userGift = userSwapGifts.first else {
+                    return Just<(SwapGift, SwapGift)?>(nil)
+                        .setFailureType(to: Error.self)
+                        .eraseToAnyPublisher()
                 }
-                return Just(nil)
-                    .setFailureType(to: Error.self)
-                    .eraseToAnyPublisher()
+                return self.findMatch(for: userGift, userId: userId)
             }
             .eraseToAnyPublisher()
     }
-
 }
+

@@ -56,8 +56,13 @@ class WishGiftFormViewModel: ObservableObject {
 
     // MARK: - Fetch Wish Gifts for a Specific Wishlist
     func fetchWishGifts(for wishlistId: UUID? = nil) {
+        guard let wishlistId = wishlistId else {
+            print("⚠️ Error: Wishlist ID is nil. Cannot fetch gifts.")
+            return
+        }
+
         isLoading = true
-        WishGiftService.shared.fetchWishGifts()
+        WishGiftService.shared.fetchWishGifts(for: wishlistId) // ✅ Now always passing a non-optional UUID
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 self.isLoading = false
@@ -65,14 +70,13 @@ class WishGiftFormViewModel: ObservableObject {
                     print("Error fetching wish gifts: \(error.localizedDescription)")
                 }
             }, receiveValue: { fetchedGifts in
-                let filteredGifts = wishlistId != nil ? fetchedGifts.filter { $0.id == wishlistId } : fetchedGifts
-                
-                // Group gifts by category
-                self.allGiftsByCategory = Dictionary(grouping: filteredGifts, by: { $0.category })
+                print("✅ Successfully fetched \(fetchedGifts.count) gifts for wishlist ID: \(wishlistId)")
+                self.allGiftsByCategory = Dictionary(grouping: fetchedGifts, by: { $0.category })
                 self.filterGifts()
             })
             .store(in: &cancellables)
     }
+
 
 
     // MARK: - Fetch Product Details
@@ -87,29 +91,35 @@ class WishGiftFormViewModel: ObservableObject {
         errorMessage = nil
 
         WishGiftService.shared.fetchProductDetails(from: storeLink)
-            .receive(on: DispatchQueue.main)
+            .receive(on: DispatchQueue.global(qos: .background)) // 🔥 Process in background
             .sink(receiveCompletion: { completion in
-                self.isLoading = false
-                if case .failure(let error) = completion {
-                    self.errorMessage = error.localizedDescription
-                    self.showError = true
+                DispatchQueue.main.async { // ✅ Ensure UI updates are handled in the main thread
+                    self.isLoading = false
+                    if case .failure(let error) = completion {
+                        self.errorMessage = "Error: \(error.localizedDescription)"
+                        self.showError = true
+                    }
                 }
             }, receiveValue: { extractedGift in
-                guard let gift = extractedGift else {
-                    self.errorMessage = "Could not extract product details."
-                    self.showError = true
-                    return
-                }
+                DispatchQueue.main.async {
+                    guard let gift = extractedGift else {
+                        self.errorMessage = "Could not extract product details."
+                        self.showError = true
+                        return
+                    }
 
-                self.name = gift.name
-                self.description = gift.description
-                self.images = gift.images
-                self.priceString = gift.price != nil ? String(format: "%.2f", gift.price!) : ""
-                self.currency = gift.currency ?? "USD"
-                self.brand = gift.brand ?? "n/a"
+                    self.name = gift.name
+                    self.description = gift.description
+                    self.images = gift.images
+                    self.priceString = gift.price != nil ? String(format: "%.2f", gift.price!) : ""
+                    self.currency = gift.currency ?? "USD"
+                    self.brand = gift.brand ?? "n/a"
+                }
             })
             .store(in: &cancellables)
     }
+
+
 
     // MARK: - Add Gift to Wishlist
     func addGiftToWishlist() -> String? {

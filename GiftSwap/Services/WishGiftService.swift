@@ -16,70 +16,98 @@ class WishGiftService {
     // Mock data for now
     private var wishlist: [WishGift] = []
     
-    // Fetch wishlist gifts with optional filters
-    func fetchWishGifts(category: String? = nil, minPrice: Double? = nil, maxPrice: Double? = nil, brand: String? = nil, occasion: String? = nil) -> AnyPublisher<[WishGift], Error> {
-        var filteredGifts = wishlist
-        
-        if let category = category {
-            filteredGifts = filteredGifts.filter { $0.category.rawValue == category }
-        }
-        
-        if let minPrice = minPrice {
-            filteredGifts = filteredGifts.filter { ($0.price ?? 0) >= minPrice }
-        }
-        
-        if let maxPrice = maxPrice {
-            filteredGifts = filteredGifts.filter { ($0.price ?? 0) <= maxPrice }
-        }
-        
-        if let brand = brand {
-            filteredGifts = filteredGifts.filter { $0.brand?.lowercased() == brand.lowercased() }
-        }
+    
+    // Fetch wish gifts for a specific wishlist
+    func fetchWishGifts(for wishlistId: UUID) -> AnyPublisher<[WishGift], Error> {
+        let filteredGifts = MockWishGifts.wishGifts.filter { $0.wishListId == wishlistId } 
         
         return Just(filteredGifts)
             .delay(for: .seconds(1), scheduler: RunLoop.main)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
+
     
     // Add a new wish gift (mock persistence)
     func addWishGift(_ gift: WishGift) -> AnyPublisher<WishGift, Error> {
-        wishlist.append(gift)
+        // Append to MockWishGifts
+        MockWishGifts.wishGifts.append(gift)
+
+        // Find the corresponding wishlist and add the gift
+        if let index = MockWishlists.mutableWishlists.firstIndex(where: { $0.id == gift.wishListId }) {
+            MockWishlists.mutableWishlists[index].wishGifts?.append(gift)
+        } else {
+            return Fail(error: NSError(domain: "WishGiftService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Wishlist not found"]))
+                .eraseToAnyPublisher()
+        }
+        
+        MockWishlists.refresh()
         
         return Just(gift)
             .delay(for: .seconds(1), scheduler: RunLoop.main)
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
+
+
     
     // Update a wish gift (mock persistence)
     func updateWishGift(_ updatedGift: WishGift) -> AnyPublisher<WishGift, Error> {
-        if let index = wishlist.firstIndex(where: { $0.id == updatedGift.id }) {
-            wishlist[index] = updatedGift
-            return Just(updatedGift)
-                .delay(for: .seconds(1), scheduler: RunLoop.main)
-                .setFailureType(to: Error.self)
-                .eraseToAnyPublisher()
+        // Update the wish gift inside MockWishGifts
+        if let index = MockWishGifts.wishGifts.firstIndex(where: { $0.id == updatedGift.id }) {
+            MockWishGifts.wishGifts[index] = updatedGift
         } else {
-            return Fail(error: NSError(domain: "WishGiftService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Gift not found"]))
+            return Fail(error: NSError(domain: "WishGiftService", code: 404,
+                                       userInfo: [NSLocalizedDescriptionKey: "Gift not found"]))
                 .eraseToAnyPublisher()
         }
+
+        // Find the wishlist containing this wish gift and update it
+        if let wishlistIndex = MockWishlists.mutableWishlists.firstIndex(where: { $0.id == updatedGift.wishListId }) {
+            var wishlist = MockWishlists.mutableWishlists[wishlistIndex] // Create a mutable copy
+
+            if let giftIndex = wishlist.wishGifts?.firstIndex(where: { $0.id == updatedGift.id }) {
+                wishlist.wishGifts?[giftIndex] = updatedGift // Update the wish gift
+                MockWishlists.mutableWishlists[wishlistIndex] = wishlist // Assign back the updated wishlist
+            }
+        }
+        
+        MockWishlists.refresh()
+
+        return Just(updatedGift)
+            .delay(for: .seconds(1), scheduler: RunLoop.main)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
     }
+
     
     // Delete a wish gift (mock persistence)
     func deleteWishGift(id: UUID) -> AnyPublisher<Bool, Error> {
-        if let index = wishlist.firstIndex(where: { $0.id == id }) {
-            wishlist.remove(at: index)
-            return Just(true)
-                .delay(for: .seconds(1), scheduler: RunLoop.main)
-                .setFailureType(to: Error.self)
-                .eraseToAnyPublisher()
+        // Remove from MockWishGifts
+        if let index = MockWishGifts.wishGifts.firstIndex(where: { $0.id == id }) {
+            MockWishGifts.wishGifts.remove(at: index)
         } else {
-            return Fail(error: NSError(domain: "WishGiftService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Gift not found"]))
+            return Fail(error: NSError(domain: "WishGiftService", code: 404,
+                                       userInfo: [NSLocalizedDescriptionKey: "Gift not found"]))
                 .eraseToAnyPublisher()
         }
+
+        // Remove from the associated wishlist
+        for i in MockWishlists.mutableWishlists.indices {
+            if let giftIndex = MockWishlists.mutableWishlists[i].wishGifts?.firstIndex(where: { $0.id == id }) {
+                MockWishlists.mutableWishlists[i].wishGifts?.remove(at: giftIndex)
+                break // Exit loop after removal
+            }
+        }
+        
+        MockWishlists.refresh()
+
+        return Just(true)
+            .delay(for: .seconds(1), scheduler: RunLoop.main)
+            .setFailureType(to: Error.self)
+            .eraseToAnyPublisher()
     }
-    
+
     func fetchProductDetails(from link: String) -> AnyPublisher<WishGift?, Error> {
         let cleanedLink = cleanStoreURL(link)
 
@@ -89,6 +117,7 @@ class WishGiftService {
         }
 
         return URLSession.shared.dataTaskPublisher(for: url)
+            .subscribe(on: DispatchQueue.global(qos: .background)) // 🔥 Run network task in background
             .map(\.data)
             .tryMap { data -> WishGift? in
                 let html = String(data: data, encoding: .utf8) ?? ""
@@ -105,27 +134,14 @@ class WishGiftService {
                 let cleanPrice = priceString?.filter("0123456789.".contains) ?? ""
                 let price = Double(cleanPrice)
 
-                // Extract multiple image URLs manually
-                let imageElements = try doc.select("#landingImage, .product-image, img")
-                var imageUrls: [String] = []
-                for element in imageElements {
-                    let src = try? element.attr("src")
-                    if let validUrl = src, validUrl.hasPrefix("http") {
-                        imageUrls.append(validUrl)
-                    }
-                    if imageUrls.count >= 4 { break } // Limit to 4 images
-                }
-
-                // If no multiple images found, check for a single image URL
-                if imageUrls.isEmpty, let singleImageUrl = try? doc.select("#landingImage, .product-image, img").attr("src"), singleImageUrl.hasPrefix("http") {
-                    imageUrls.append(singleImageUrl)
-                }
+                var imageUrls: [String] = try doc.select("#landingImage, .product-image, img").compactMap { try? $0.attr("src") }
+                imageUrls = imageUrls.filter { $0.hasPrefix("http") }.prefix(4).map { $0 } // Ensure HTTP images only, limit to 4
 
                 return WishGift(
                     name: name,
-                    description: description ?? "No description is provided",
+                    description: description ?? "No description provided",
                     category: .other,
-                    images: imageUrls, // Always ensures an array
+                    images: imageUrls.isEmpty ? ["https://picsum.photos/300/200"] : imageUrls,
                     storeLink: cleanedLink,
                     price: price,
                     currency: "USD",
@@ -137,6 +153,7 @@ class WishGiftService {
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
+
 
     
     

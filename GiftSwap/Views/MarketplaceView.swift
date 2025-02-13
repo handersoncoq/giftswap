@@ -110,7 +110,7 @@ struct CategorySection: View {
 
 
 
-struct GiftBasketView_Previews: PreviewProvider {
+struct MarketplaceView_Previews: PreviewProvider {
     static var previews: some View {
         MarketplaceView()
     }

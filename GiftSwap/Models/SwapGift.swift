@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SwapGift: Identifiable, Codable {
+struct SwapGift: Identifiable, Codable, Hashable {
     var id: UUID
     var name: String
     var description: String
@@ -45,5 +45,13 @@ struct SwapGift: Identifiable, Codable {
         self.swapStatus = swapStatus
         self.addedAt = addedAt
     }
+    
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(id)
+        }
+
+        static func == (lhs: SwapGift, rhs: SwapGift) -> Bool {
+            return lhs.id == rhs.id
+        }
 }
 

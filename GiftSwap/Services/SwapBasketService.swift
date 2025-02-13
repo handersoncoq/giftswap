@@ -33,22 +33,24 @@ class SwapBasketService {
             .eraseToAnyPublisher()
     }
     
-    // Fetch swap basket gifts for a specific user
     func fetchUserSwapBasketGifts(userId: UUID) -> AnyPublisher<[SwapGift], Error> {
-        return fetchAllGiftsInSwapBaskets()
-            .map { allGifts in
-                allGifts.filter { $0.ownerId == userId }
-            }
-            .eraseToAnyPublisher()
-    }
+           let userGiftIds = swapBaskets.filter { $0.userId == userId }.map { $0.giftId }
+
+           return SwapGiftService.shared.fetchGifts()
+               .map { allGifts in
+                   allGifts.filter { userGiftIds.contains($0.id) }
+               }
+               .eraseToAnyPublisher()
+       }
 
     
     // TEMPORARY: add gift to swap basket
     
     func addGiftToSwapBasket(_ swapBasketItem: SwapBasket) {
         swapBaskets.append(swapBasketItem)
+        MockSwapBaskets.swapBaskets.append(swapBasketItem)
     }
-    
+
     // update status
     func updateSwapStatus(for giftId: UUID, to newStatus: SwapStatus) {
         if let index = swapBaskets.firstIndex(where: { $0.id == giftId }) {

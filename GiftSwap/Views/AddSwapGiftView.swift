@@ -110,8 +110,12 @@ struct AddSwapGiftView: View {
             alertMessage = "Gift added successfully!"
             showAlert = true
             navigateToSwapBasket = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                NotificationCenter.default.post(name: NSNotification.Name("RefreshSwapBasket"), object: nil)
+            }
         }
     }
+
 }
 
 

@@ -13,22 +13,23 @@ struct AddWishGiftView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var showAlert = false
     @State private var alertMessage = ""
-    @State private var navigateToWishlist = false
+    @State private var navigateToWishlistDetailView = false
     @State private var isManualEntry = false
     let wishlist: Wishlist
-    @State var selectedWishlist: UUID? = MockWishlists.wishlists.first?.id
+    @State var selectedWishlist: UUID?
     
     @StateObject private var viewModel: WishGiftFormViewModel
     
     init(wishlist: Wishlist) {
         self.wishlist = wishlist
         _viewModel = StateObject(wrappedValue: WishGiftFormViewModel(wishlist: wishlist))
+        _selectedWishlist = State(initialValue: wishlist.id)
     }
     
     var body: some View {
         MainLayoutView(isRootView: false) {
             VStack(alignment: .leading, spacing: 0) {
-                Text("Add a Gift to Your Wishlist")
+                Text("Add Gift to Your Wishlist")
                     .font(.largeTitle)
                     .bold()
                     .padding()
@@ -61,13 +62,13 @@ struct AddWishGiftView: View {
             }
             .alert(alertMessage, isPresented: $showAlert) {
                 Button("OK", role: .cancel) {
-                    if navigateToWishlist {
-                        navigateToWishlist = true
+                    if navigateToWishlistDetailView {
+                        navigateToWishlistDetailView = true
                     }
                 }
             }
-            .navigationDestination(isPresented: $navigateToWishlist) {
-                WishlistView()
+            .navigationDestination(isPresented: $navigateToWishlistDetailView) {
+                WishListDetailView(wishlist: wishlist)
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -191,38 +192,39 @@ struct AddWishGiftView: View {
         VStack(alignment: .center, spacing: 0) {
             Text("Wishlist")
                 .font(.headline)
-            
+
             ZStack {
-                Picker("", selection: $selectedWishlist) {
-                    ForEach(MockWishlists.wishlists, id: \.id) { wishlist in
-                        Text(wishlist.name)
+                if let user = AuthService.shared.currentUser, let userWishlists = user.wishlists, !userWishlists.isEmpty {
+                    Picker("Select Wishlist", selection: $selectedWishlist) {
+                        ForEach(userWishlists, id: \.id) { wishlist in
+                            Text(wishlist.name)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                                .tag(wishlist.id)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                    .opacity(0.02) // Hides default picker UI
+
+                    HStack {
+                        Text(userWishlists.first(where: { $0.id == selectedWishlist })?.name ?? "Select Wishlist")
                             .lineLimit(1)
                             .truncationMode(.tail)
-                            .tag(wishlist.id)
+                            .foregroundColor(Color.blue)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Image(systemName: "chevron.down").foregroundColor(Color.blue)
                     }
+                    .padding(.horizontal)
+                    .allowsHitTesting(false) // Prevents direct interaction with the HStack
+                } else {
+                    Text("No Wishlists Available")
+                        .foregroundColor(.gray)
                 }
-                .pickerStyle(MenuPickerStyle())
-                .opacity(0.02)
-                HStack {
-                    Text(selectedWishlistName)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                        .foregroundColor(Color.blue)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Image(systemName: "chevron.down").foregroundColor(Color.blue)
-                }
-                .padding(.horizontal)
-                .allowsHitTesting(false)
             }
             .frame(width: 200)
         }
     }
-    
-    
-    private var selectedWishlistName: String {
-        MockWishlists.wishlists.first { $0.id == selectedWishlist }?.name ?? "Select a wishlist"
-    }
-    
+
     
     
     
@@ -248,7 +250,7 @@ struct AddWishGiftView: View {
         } else {
             alertMessage = "Gift added successfully!"
             showAlert = true
-            navigateToWishlist = true
+            navigateToWishlistDetailView = true
             presentationMode.wrappedValue.dismiss()
         }
     }

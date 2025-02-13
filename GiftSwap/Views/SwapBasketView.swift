@@ -35,7 +35,7 @@ struct SwapBasketView: View {
                 
                 Spacer()
             }.onAppear {
-                viewModel.refreshSwapBasket()
+                viewModel.fetchUserSwapBasketGifts()
             }
             .padding(.horizontal)
             .navigationBarBackButtonHidden(true)
@@ -97,17 +97,17 @@ struct SwapBasketView: View {
 
 
     private var giftList: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 16) {
-                ForEach(viewModel.giftsByCategory.keys.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { category in
-                    if let gifts = viewModel.giftsByCategory[category] {
-                        categorySection(category: category, gifts: gifts)
-                    }
-                }
-            }
-            .padding(.bottom, 50)
-        }
-    }
+           ScrollView(showsIndicators: false) {
+               VStack(alignment: .leading, spacing: 16) {
+                   ForEach(viewModel.giftsByCategory.keys.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { category in
+                       if let gifts = viewModel.giftsByCategory[category] {
+                           categorySection(category: category, gifts: gifts)
+                       }
+                   }
+               }
+               .padding(.bottom, 50)
+           }
+       }
     
     private var emptySwapBasketMessage: some View {
         VStack(spacing: 10) {

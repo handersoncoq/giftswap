@@ -82,7 +82,7 @@ struct LoginView: View {
 
                 Spacer()
                 
-                footerView()
+                FooterView()
                     .padding(.bottom, 10)
             }
             .padding()
@@ -94,19 +94,7 @@ struct LoginView: View {
         .navigationBarBackButtonHidden(true)
     }
 
-    // MARK: - Footer View
-    private func footerView() -> some View {
-        VStack {
-            Text("\(NSLocalizedString("app_name", comment: "")) v\(NSLocalizedString("app_version", comment: ""))")
-                .font(.caption2)
-                .foregroundColor(Color.black.opacity(0.5))
-            
-            Text("© \(Date().formatted(.dateTime.year())) All rights reserved.")
-                .font(.caption2)
-                .foregroundColor(Color.black.opacity(0.5))
-        }
-    }
-    
+
     // MARK: - Input Field Component
     private func inputField(icon: String, placeholder: String, text: Binding<String>, keyboardType: UIKeyboardType = .default, isSecure: Bool = false) -> some View {
         ZStack(alignment: .leading) {

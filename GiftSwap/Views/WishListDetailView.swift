@@ -11,20 +11,20 @@ import Combine
 
 struct WishListDetailView: View {
     let wishlist: Wishlist
-        @StateObject private var viewModel: WishGiftFormViewModel
-        @State private var showConfirmation = false
-        @State private var giftToRemove: WishGift?
-        @State private var showAlert = false
-        @State private var alertMessage = ""
-        @State private var navigateToAddGift = false
-        @State private var navigateToCuratedGifts = false
-        @State private var navigateToEditWishlist = false
-        @State private var expandedCategories: Set<GiftCategory> = []
+    @StateObject private var viewModel: WishlistDetailViewModel
+    @State private var showConfirmation = false
+    @State private var giftToRemove: WishGift?
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    @State private var navigateToCuratedGifts = false
+    @State private var navigateToAddWishGift = false
+    @State private var navigateToEditWishlist = false
+    @State private var expandedCategories: Set<GiftCategory> = []
 
-        init(wishlist: Wishlist) {
-            self.wishlist = wishlist
-            _viewModel = StateObject(wrappedValue: WishGiftFormViewModel(wishlist: wishlist))
-        }
+    init(wishlist: Wishlist) {
+        self.wishlist = wishlist
+        _viewModel = StateObject(wrappedValue: WishlistDetailViewModel(wishlist: wishlist))
+    }
 
     var body: some View {
         MainLayoutView(isRootView: false) {
@@ -45,7 +45,7 @@ struct WishListDetailView: View {
                 Spacer()
             }
             .onAppear {
-                viewModel.fetchWishGifts(for: wishlist.id)
+                viewModel.fetchWishGifts()
             }
             .padding(.horizontal)
             .navigationBarBackButtonHidden(true)
@@ -61,16 +61,17 @@ struct WishListDetailView: View {
                 cancelButton
             }
         }
-        .navigationDestination(isPresented: $navigateToAddGift) {
-            AddWishGiftView(wishlist: wishlist)
-        }
         .navigationDestination(isPresented: $navigateToCuratedGifts) {
             CuratedGifts()
         }
         .navigationDestination(isPresented: $navigateToEditWishlist) {
             EditWishlistView(wishlist: wishlist)
         }
+        .navigationDestination(isPresented: $navigateToAddWishGift) {
+            AddWishGiftView(wishlist: wishlist)
+        }
     }
+
 
     // MARK: - Wishlist Information View (Title + Edit)
     private var wishlistInfoView: some View {
@@ -90,21 +91,34 @@ struct WishListDetailView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
             }
+            
+            HStack{
+                VStack(alignment: .leading){
+                    if let description = wishlist.description, !description.isEmpty {
+                        Text(description)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary).padding(.top, 8)
+                    }
+                    HStack {
+                        OccasionIcons(for: wishlist.category)
+                            .font(.title3)
 
-            if let description = wishlist.description, !description.isEmpty {
-                Text(description)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                        Text(wishlist.category.rawValue.capitalized)
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                    }.padding(.top, 1)
+                }
+                Spacer()
+                Button(action: { navigateToAddWishGift = true }) {
+                    Image(systemName: "plus")
+                        .font(.title)
+                        .frame(width: 40, height: 40)
+                        .background(Color("App_Primary").opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                
             }
 
-            HStack {
-                OccasionIcons(for: wishlist.category)
-                    .font(.title3)
-
-                Text(wishlist.category.rawValue.capitalized)
-                    .font(.headline)
-                    .foregroundColor(.gray)
-            }
         }
         .padding(.vertical)
     }
@@ -178,7 +192,7 @@ struct WishListDetailView: View {
 
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2), spacing: 12) {
                 ForEach(expandedCategories.contains(category) ? gifts : Array(gifts.prefix(4))) { gift in
-                    NavigationLink(destination: WishGiftDetailView(gift: gift, viewModel: viewModel)) {
+                    NavigationLink(destination: WishGiftDetailView(gift: gift, viewModel: WishGiftFormViewModel(wishlist: wishlist))) {
                         WishGiftCard(gift: gift, onRemove: {
                             giftToRemove = gift
                             showConfirmation = true
@@ -228,14 +242,17 @@ struct WishListDetailView: View {
 
 // Preview
 #Preview {
-    WishListDetailView(wishlist: Wishlist(
-        userId: MockUsers.users[1].id,
+    let mockWishlist = Wishlist(
+        userId: MockUsers.initializedUsers[1].id,
         name: "My Christmas Wishlist",
         description: "My dream Christmas gifts!",
         isPrivate: true,
         isActive: true,
         category: .christmas,
         addedAt: Date()
-    ))
+    )
+
+    return WishListDetailView(wishlist: mockWishlist)
 }
+
 
