@@ -69,9 +69,10 @@ class WishlistViewModel: ObservableObject {
 
     // Refresh wishlists with loading state
     func refreshWishlists() {
-        isLoading = true
+        self.isLoading = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             self.fetchUserWishlists()
+            self.isLoading = false
         }
     }
 }

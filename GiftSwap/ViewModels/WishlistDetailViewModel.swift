@@ -25,7 +25,7 @@ class WishlistDetailViewModel: ObservableObject {
     // Fetch wish gifts for this specific wishlist
     func fetchWishGifts() {
         isLoading = true
-        WishGiftService.shared.fetchWishGifts(for: wishlist.id) // ✅ Fetch gifts only for this wishlist
+        WishGiftService.shared.fetchWishGifts(for: wishlist.id) // Fetch gifts only for this wishlist
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 self.isLoading = false
@@ -33,7 +33,7 @@ class WishlistDetailViewModel: ObservableObject {
                     print("Error fetching wish gifts: \(error.localizedDescription)")
                 }
             }, receiveValue: { fetchedGifts in
-                print("✅ Successfully fetched \(fetchedGifts.count) gifts for wishlist ID: \(self.wishlist.id)")
+                print("Successfully fetched \(fetchedGifts.count) gifts for wishlist ID: \(self.wishlist.id)")
                 self.allGiftsByCategory = Dictionary(grouping: fetchedGifts, by: { $0.category })
                 self.filterGifts()
             })
@@ -67,7 +67,7 @@ class WishlistDetailViewModel: ObservableObject {
     }
 
     func refreshWishGifts() {
-        isLoading = true
+        self.isLoading = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             self.fetchWishGifts()
             self.isLoading = false

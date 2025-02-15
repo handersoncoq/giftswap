@@ -57,12 +57,12 @@ class WishGiftFormViewModel: ObservableObject {
     // MARK: - Fetch Wish Gifts for a Specific Wishlist
     func fetchWishGifts(for wishlistId: UUID? = nil) {
         guard let wishlistId = wishlistId else {
-            print("⚠️ Error: Wishlist ID is nil. Cannot fetch gifts.")
+            print("Error: Wishlist ID is nil. Cannot fetch gifts.")
             return
         }
 
         isLoading = true
-        WishGiftService.shared.fetchWishGifts(for: wishlistId) // ✅ Now always passing a non-optional UUID
+        WishGiftService.shared.fetchWishGifts(for: wishlistId) // Now always passing a non-optional UUID
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 self.isLoading = false
@@ -70,7 +70,7 @@ class WishGiftFormViewModel: ObservableObject {
                     print("Error fetching wish gifts: \(error.localizedDescription)")
                 }
             }, receiveValue: { fetchedGifts in
-                print("✅ Successfully fetched \(fetchedGifts.count) gifts for wishlist ID: \(wishlistId)")
+                print("Successfully fetched \(fetchedGifts.count) gifts for wishlist ID: \(wishlistId)")
                 self.allGiftsByCategory = Dictionary(grouping: fetchedGifts, by: { $0.category })
                 self.filterGifts()
             })
@@ -91,9 +91,9 @@ class WishGiftFormViewModel: ObservableObject {
         errorMessage = nil
 
         WishGiftService.shared.fetchProductDetails(from: storeLink)
-            .receive(on: DispatchQueue.global(qos: .background)) // 🔥 Process in background
+            .receive(on: DispatchQueue.global(qos: .background)) // Process in background
             .sink(receiveCompletion: { completion in
-                DispatchQueue.main.async { // ✅ Ensure UI updates are handled in the main thread
+                DispatchQueue.main.async { // Ensure UI updates are handled in the main thread
                     self.isLoading = false
                     if case .failure(let error) = completion {
                         self.errorMessage = "Error: \(error.localizedDescription)"

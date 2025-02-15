@@ -19,7 +19,7 @@ class SwapBasketViewModel: ObservableObject {
 
     init() {
         fetchUserSwapBasketGifts()
-        NotificationCenter.default.addObserver(self, selector: #selector(refreshSwapBasket), name: NSNotification.Name("RefreshSwapBasket"), object: nil)
+//        NotificationCenter.default.addObserver(self, selector: #selector(refreshSwapBasket), name: NSNotification.Name("RefreshSwapBasket"), object: nil)
     }
     
     // Fetch ONLY the current user's swap basket gifts
@@ -80,9 +80,10 @@ class SwapBasketViewModel: ObservableObject {
     
     // Refresh wishlist
     @objc func refreshSwapBasket() {
-        isLoading = true
+        self.isLoading = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             self.fetchUserSwapBasketGifts()
+            self.isLoading = false
         }
     }
     

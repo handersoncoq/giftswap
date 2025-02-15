@@ -45,7 +45,7 @@ struct WishListDetailView: View {
                 Spacer()
             }
             .onAppear {
-                viewModel.fetchWishGifts()
+                viewModel.refreshWishGifts()
             }
             .padding(.horizontal)
             .navigationBarBackButtonHidden(true)
@@ -243,7 +243,7 @@ struct WishListDetailView: View {
 // Preview
 #Preview {
     let mockWishlist = Wishlist(
-        userId: MockUsers.initializedUsers[1].id,
+        userId: MockUsers.initializedUsers[0].id,
         name: "My Christmas Wishlist",
         description: "My dream Christmas gifts!",
         isPrivate: true,

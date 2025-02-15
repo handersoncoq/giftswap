@@ -35,7 +35,7 @@ struct SwapBasketView: View {
                 
                 Spacer()
             }.onAppear {
-                viewModel.fetchUserSwapBasketGifts()
+                viewModel.refreshSwapBasket()
             }
             .padding(.horizontal)
             .navigationBarBackButtonHidden(true)

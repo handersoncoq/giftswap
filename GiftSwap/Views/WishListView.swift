@@ -46,7 +46,7 @@ struct WishlistView: View {
                     Button("Cancel", role: .cancel) { }
                 }
             }
-        }.onAppear { viewModel.fetchUserWishlists() }
+        }.onAppear { viewModel.refreshWishlists() }
         .navigationDestination(isPresented: $navigateToAddWishlist) {
             AddWishListView()
         }

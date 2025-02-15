@@ -103,18 +103,21 @@ struct AddSwapGiftView: View {
     // MARK: - Add Gift Logic
     private func addGift() {
         let result = viewModel.addGiftToSwapBasket()
+        
         if let errorMessage = result {
             alertMessage = errorMessage
             showAlert = true
         } else {
             alertMessage = "Gift added successfully!"
             showAlert = true
-            navigateToSwapBasket = true
+//            NotificationCenter.default.post(name: NSNotification.Name("RefreshSwapBasket"), object: nil)
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                NotificationCenter.default.post(name: NSNotification.Name("RefreshSwapBasket"), object: nil)
+                navigateToSwapBasket = true
             }
         }
     }
+
 
 }
 
