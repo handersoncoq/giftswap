@@ -9,6 +9,7 @@ import SwiftUI
 
 struct MarketplaceView: View {
     @StateObject private var viewModel = MarketplaceViewModel()
+    @State var isTapped = false
 
     var body: some View {
         ScrollView(.vertical) {

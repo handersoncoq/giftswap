@@ -41,22 +41,22 @@ struct HomeView: View {
     }
     
     private var ctaButtonSection: some View {
-            VStack {
-                Text("Got a gift that’s not quite right? Add it to your basket, and we’ll find the perfect swap for you!")
-                    .font(.body)
-                    .padding(.horizontal)
-
-                CTAButton(
-                    label: "Add Gifts to Your Swap Basket Now!",
-                    backgroundColor: Color("App_Primary"),
-                    action: { navigateToAddGift = true },
-                    icon: Image(systemName: "basket")
-                )
+        VStack {
+            Text("Got a gift that’s not quite right? Add it to your basket, and we’ll find the perfect swap for you!")
+                .font(.body)
                 .padding(.horizontal)
-            }
+            
+            CTAButton(
+                label: "Add Gifts to Your Swap Basket Now!",
+                backgroundColor: Color("App_Primary"),
+                action: { navigateToAddGift = true },
+                icon: Image(systemName: "basket")
+            )
+            .padding(.horizontal)
         }
-
-        
+    }
+    
+    
 }
 
 
@@ -123,16 +123,16 @@ private var partnerSection: some View {
             Spacer()
             
             NavigationLink(destination: CuratedGifts()){
-                    Image(systemName: "arrow.right")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(Color.blue)
-                        .padding(20)
-                    
-                }}
-        }.padding(.horizontal)
-    }
+                Image(systemName: "arrow.right")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(Color.blue)
+                    .padding(20)
+                
+            }}
+    }.padding(.horizontal)
+}
 
 private var footnoteSection: some View {
     (Text("¹")
@@ -146,7 +146,7 @@ private var footnoteSection: some View {
     .padding(.vertical, 30)
 }
 
-    
+
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         HomeView()

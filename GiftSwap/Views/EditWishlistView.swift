@@ -46,14 +46,14 @@ struct EditWishlistView: View {
                 HStack {
                     SecondaryButton(
                         action: { presentationMode.wrappedValue.dismiss() },
-                        title: "Cancel",
+                        label: "Cancel",
                         backgroundColor: Color.gray.opacity(0.4),
                         foregroundColor: Color.blue
                     )
                     
                     SecondaryButton(
                         action: saveChanges,
-                        title: "Save Changes"
+                        label: "Save Changes"
                     )
                 }
             }

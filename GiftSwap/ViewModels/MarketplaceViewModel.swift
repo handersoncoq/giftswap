@@ -52,6 +52,11 @@ class MarketplaceViewModel: ObservableObject {
 
     func fetchGiftsFromSwapBasket() {
         SwapBasketService.shared.fetchAllGiftsInSwapBaskets()
+            .map { (gifts: [SwapGift]) -> [SwapGift] in
+                // Exclude gifts that belong to the current user
+                guard let currentUser = AuthService.shared.currentUser else { return [] }
+                return gifts.filter { $0.ownerId != currentUser.id }
+            }
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 switch completion {
@@ -60,12 +65,13 @@ class MarketplaceViewModel: ObservableObject {
                 case .failure(let error):
                     print("Error fetching swap basket gifts: \(error)")
                 }
-            }, receiveValue: { [weak self] gifts in
-                self?.gifts = gifts
-                self?.groupGiftsByCategory(gifts)
+            }, receiveValue: { [weak self] (filteredGifts: [SwapGift]) in
+                self?.gifts = filteredGifts
+                self?.groupGiftsByCategory(filteredGifts)
             })
             .store(in: &cancellables)
     }
+
 
     func groupGiftsByCategory(_ gifts: [SwapGift]) {
         giftsByCategory = Dictionary(grouping: gifts, by: { $0.category })

@@ -83,10 +83,6 @@ struct AddWishGiftView: View {
         .pickerStyle(SegmentedPickerStyle())
         .cornerRadius(10)
         .padding(.bottom, 40)
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(Color("App_Neutral"), lineWidth: 1)
-        )
         .onAppear {
             UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(Color("App_Primary"))
             UISegmentedControl.appearance().backgroundColor = UIColor.clear
@@ -130,7 +126,7 @@ struct AddWishGiftView: View {
             action: {
                 viewModel.fetchGiftDetails()
             },
-            title: "Fetch Details",
+            label: "Fetch Details",
             isLoading: viewModel.isLoading
         )
         .padding(.top, -10)
@@ -184,7 +180,7 @@ struct AddWishGiftView: View {
                     Text(category.rawValue.capitalized)
                 }
             }
-            .pickerStyle(MenuPickerStyle())
+            .pickerStyle(MenuPickerStyle()).padding(.leading, -12)
         }
     }
     
@@ -204,7 +200,7 @@ struct AddWishGiftView: View {
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
-                    .opacity(0.02) // Hides default picker UI
+                    .opacity(0.02)
 
                     HStack {
                         Text(userWishlists.first(where: { $0.id == selectedWishlist })?.name ?? "Select Wishlist")

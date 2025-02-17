@@ -1,15 +1,16 @@
 //
-//  WishGiftCard.swift
+//  GiftSelectionCard.swift
 //  GiftSwap
 //
-//  Created by Handerson COQ on 2/10/25.
+//  Created by Handerson COQ on 2/15/25.
 //
 
 import SwiftUI
 
-struct WishGiftCard: View {
-    let gift: WishGift
-    let onRemove: () -> Void
+struct GiftSelectionCard<T: GiftProtocol>: View {
+    let gift: T
+    @Binding var isSelected: Bool
+    let onSelect: () -> Void
     private let cardSize: CGFloat = 170
 
     var body: some View {
@@ -35,12 +36,6 @@ struct WishGiftCard: View {
                                 .frame(width: 40, height: 40)
                                 .foregroundColor(Color("App_Primary"))
                         )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color("App_Primary"), lineWidth: 1)
-                                .padding()
-                                .padding(.bottom, -12)
-                        )
                 }
             }
             .cornerRadius(10)
@@ -50,34 +45,28 @@ struct WishGiftCard: View {
                     .font(.headline)
                     .foregroundColor(.primary)
                     .lineLimit(1)
-                    .truncationMode(.tail)
 
                 Text(gift.description)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
-                    .truncationMode(.tail)
 
                 HStack {
-                    if let price = gift.price, let currency = gift.currency {
-                        Text("\(currency) \(String(format: "%.2f", price))")
-                            .font(.caption)
-                            .foregroundColor(Color.blue).padding(.vertical, 10)
-                    } else {
-                        Text("Price Unavailable")
-                            .font(.subheadline)
-                            .foregroundColor(.gray).padding(.vertical, 10)
+                    if let swapGift = gift as? SwapGift {
+                        SwapStatusView(status: swapGift.swapStatus)
                     }
-
+                    
                     Spacer()
 
-                    // Remove button
-                    Button(action: onRemove) {
-                        Image(systemName: "trash")
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(.red)
-                            .background(Color.white.clipShape(Circle()))
+                    //   Selection Button
+                    Button(action: {
+                        isSelected.toggle()
+                        onSelect()
+                    }) {
+                        Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                            .foregroundColor( .appPrimary)
+                            .font(.title3)
+                            
                     }
                     .padding(.trailing, 4)
                 }
@@ -93,14 +82,26 @@ struct WishGiftCard: View {
     }
 }
 
-struct WishGiftCard_Previews: PreviewProvider {
+// MARK: - Preview
+struct GiftSelectionCard_Previews: PreviewProvider {
     static var previews: some View {
-        VStack {
-            WishGiftCard(gift: WishGift(
-                id: UUID(), name: "Gift 1", description: "A beautiful gift", category: .beauty, images: ["https://picsum.photos/300/200", "https://picsum.photos/300/200"], storeLink: "String", price: 25, currency: "USD", brand: "nike", addedDate: Date(),
-                wishListId: UUID()
-            ), onRemove: {print("Removed")})
-        }
-        .previewLayout(.sizeThatFits)
+        @State var isSelected = true
+        return GiftSelectionCard(
+            gift: SwapGift(
+                name: "Luxury Watch",
+                description: "A premium stainless steel watch",
+                imageURLs: ["https://picsum.photos/200"],
+                value: 250.00,
+                isAvailable: true,
+                storeLink: nil,
+                category: .fashion,
+                ownerId: UUID(),
+                swapStatus: .available,
+                addedAt: Date()
+            ),
+            isSelected: $isSelected,
+            onSelect: {print("pressed")}
+        )
+        .previewDisplayName("Gift Selection Card")
     }
 }

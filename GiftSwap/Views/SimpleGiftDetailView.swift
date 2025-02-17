@@ -17,18 +17,19 @@ struct SimpleGiftDetailView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var giftOwner: String = "Loading..."
-
+    
     @Environment(\.presentationMode) var presentationMode
-
+    
     var body: some View {
         
-            ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
-                    SimpleGiftImageCarousel(gift: gift, currentIndex: $currentIndex)
-                    SimpleGiftDetails(gift: gift)
-                    
-                    VStack(alignment: .leading) {
-                        HStack(spacing: 25){
+        VStack {
+            Spacer()
+            VStack(alignment: .leading, spacing: 14) {
+                SimpleGiftImageCarousel(gift: gift, currentIndex: $currentIndex)
+                SimpleGiftDetails(gift: gift)
+                
+                VStack(alignment: .leading) {
+                    HStack(spacing: 25){
                         SwapStatusView(status: gift.swapStatus)
                         VStack(alignment: .leading) {
                             HStack {
@@ -38,34 +39,34 @@ struct SimpleGiftDetailView: View {
                                     .foregroundColor(Color.secondary)
                             }
                         }}
+                }.padding(.bottom, 45)
+                .onAppear {
+                    viewModel.getGiftOwner(gift: gift) { ownerName in
+                        giftOwner = ownerName
                     }
-                    .onAppear {
-                        viewModel.getGiftOwner(gift: gift) { ownerName in
-                            giftOwner = ownerName
-                        }
-                    }
-
-                   
                 }
-                .padding()
-            }.padding(.vertical, 45).background(Color.appPrimary.opacity(0.05))
-            .alert(alertMessage, isPresented: $showAlert) {
-                Button("OK", role: .cancel) { }
+                
+                
             }
+            .padding(.horizontal).padding(.top, -120)
+            Spacer()
+            FooterView()
+        }
+        .alert(alertMessage, isPresented: $showAlert) {
+            Button("OK", role: .cancel) { }
+        }
+        
         
     }
-
-
+    
+    
 }
-
-// get gift's owner
-
 
 // Gift Images
 struct SimpleGiftImageCarousel: View {
     let gift: SwapGift
     @Binding var currentIndex: Int
-
+    
     var body: some View {
         if let images = gift.imageURLs, !images.isEmpty {
             ZStack {
@@ -88,7 +89,7 @@ struct SimpleGiftImageCarousel: View {
                 }
                 .frame(height: 270)
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-
+                
                 // Image Indicator
                 if images.count >= 1 {
                     Text("\(currentIndex + 1)/\(images.count)")
@@ -108,25 +109,25 @@ struct SimpleGiftImageCarousel: View {
 // Gift Details
 struct SimpleGiftDetails: View {
     let gift: SwapGift
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(gift.name)
                 .font(.largeTitle)
                 .bold()
-
+            
             Text(gift.description)
                 .font(.body)
-
+            
             Text("Category: \(gift.category.rawValue.capitalized)")
                 .font(.caption)
                 .foregroundColor(.secondary)
-
+            
             HStack(spacing: 18) {
                 Text("Value: $\(gift.value, specifier: "%.2f")")
                     .font(.body)
                     .foregroundColor(Color.blue)
-
+                
                 if let storeLink = gift.storeLink, let url = URL(string: storeLink) {
                     Link(destination: url) {
                         Image(systemName: "link")

@@ -10,6 +10,8 @@ import SwiftUI
 struct GiftDetailView: View {
     let gift: SwapGift
     @State private var currentIndex: Int = 0
+    @State var showSwapSelectionSheet: Bool = false
+    @State private var navigateToSwapBasket = false
     
     var body: some View {
         MainLayoutView(isRootView: false) {
@@ -52,7 +54,7 @@ struct GiftDetailView: View {
                                     .foregroundColor(Color("App_Primary"))
                                     .frame(maxWidth: .infinity, alignment: .center)
                                     .offset(y: 152)
-    
+                                
                             }
                         }.padding(.bottom, 30)
                     } else {
@@ -89,22 +91,29 @@ struct GiftDetailView: View {
                     SwapStatusView(status: gift.swapStatus)
                     
                     
-                    
-                    CTAButton(
-                        label: "Swap With A Gift In Your Basket",
-                        backgroundColor: Color("App_Primary"),
-                        action: {
-                            print("Gift Swap!")
-                        },
-                        icon: Image(systemName: "arrow.2.circlepath")
-                    )
-                    .padding(.bottom, 45)
-                    .padding(.top, 8)
-                    .disabled(gift.swapStatus != .available)
-                    .opacity(gift.swapStatus == .available ? 1 : 0.5)
-                }
+                    VStack{
+                        CTAButton(
+                            label: "Swap With A Gift In Your Basket",
+                            backgroundColor: Color("App_Primary"),
+                            action: {
+                                showSwapSelectionSheet = true
+                            },
+                            icon: Image(systemName: "arrow.2.circlepath")
+                        )
+                        .padding(.bottom, 45)
+                        .padding(.top, 8)
+                        .disabled(gift.swapStatus != .available)
+                        .opacity(gift.swapStatus == .available ? 1 : 0.5)
+                    }.sheet(isPresented: $showSwapSelectionSheet) {
+                        SwapSelectionSheetView(onDismiss: {
+                            navigateToSwapBasket = true
+                        })
+                    }.navigationDestination(isPresented: $navigateToSwapBasket) {
+                        SwapBasketView()
+                    }                }
                 .padding()
             }
+            .interactiveDismissDisabled(false)
             .navigationBarBackButtonHidden(true)
         }
     }

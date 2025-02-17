@@ -7,13 +7,13 @@
 
 import Foundation
 
-struct WishGift: Identifiable, Codable {
+struct WishGift: Identifiable, Codable, GiftProtocol {
     let id: UUID
     var name: String
     var description: String
     var category: GiftCategory
-    var images: [String]
-    var storeLink: String
+    var imageURLs: [String]?
+    var storeLink: String?
     var price: Double?
     var currency: String? = "USD"
     var brand: String?
@@ -37,7 +37,7 @@ struct WishGift: Identifiable, Codable {
         self.name = name
         self.description = description
         self.category = category
-        self.images = images
+        self.imageURLs = images
         self.storeLink = storeLink
         self.price = price
         self.currency = currency

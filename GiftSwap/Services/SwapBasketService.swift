@@ -52,11 +52,28 @@ class SwapBasketService {
     }
 
     // update status
-    func updateSwapStatus(for giftId: UUID, to newStatus: SwapStatus) {
-        if let index = swapBaskets.firstIndex(where: { $0.id == giftId }) {
+    func updateSwapStatus(for giftId: UUID, to newStatus: SwapStatus) -> AnyPublisher<Bool, Error> {
+        if let index = swapBaskets.firstIndex(where: { $0.giftId == giftId }) {
             swapBaskets[index].status = newStatus
+            MockSwapBaskets.swapBaskets = swapBaskets
+
+            if var updatedGift = SwapGiftService.shared.getGift(by: giftId) {
+                updatedGift.swapStatus = newStatus
+                
+                return SwapGiftService.shared.updateGift(updatedGift)
+                    .map { _ in true } 
+                    .eraseToAnyPublisher()
+            } else {
+                return Fail(error: NSError(domain: "SwapBasketService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Gift not found"]))
+                    .eraseToAnyPublisher()
+            }
+        } else {
+            return Fail(error: NSError(domain: "SwapBasketService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Gift not found in Swap Basket"]))
+                .eraseToAnyPublisher()
         }
     }
+
+
 
 
     // Remove a gift from the swap basket

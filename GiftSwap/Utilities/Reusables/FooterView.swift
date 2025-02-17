@@ -11,11 +11,11 @@ func FooterView() -> some View {
     VStack {
         Text("\(NSLocalizedString("app_name", comment: "")) v\(NSLocalizedString("app_version", comment: ""))")
             .font(.caption2)
-            .foregroundColor(Color.black.opacity(0.5))
+            .foregroundColor(Color.blackAndWhite.opacity(0.5))
         
         Text("© \(Date().formatted(.dateTime.year())) All rights reserved.")
             .font(.caption2)
-            .foregroundColor(Color.black.opacity(0.5))
+            .foregroundColor(Color.blackAndWhite.opacity(0.5))
     }
 }
 

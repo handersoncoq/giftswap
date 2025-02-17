@@ -21,7 +21,7 @@ struct AppTextField: View {
                 if isMultiline {
                     if text.isEmpty {
                         Text(placeholder)
-                            .foregroundColor(.black.opacity(0.5))
+                            .foregroundColor(Color.blackAndWhite.opacity(0.5))
                             .padding(15)
                     }
 
@@ -34,7 +34,7 @@ struct AppTextField: View {
                             RoundedRectangle(cornerRadius: 10)
                                 .stroke(Color("Primary_Neutral").opacity(0.06), lineWidth: 1)
                         )
-                        .foregroundColor(.primary)
+                        .foregroundColor(Color.blackAndWhite.opacity(0.5))
                         .scrollContentBackground(.hidden)
                         .textSelection(.enabled)
                         .onChange(of: text) { _, newValue in
@@ -58,7 +58,7 @@ struct AppTextField: View {
                     } else {
                         TextField(placeholder, text: $text, prompt: Text(placeholder)
                             .fontWeight(.medium)
-                            .foregroundColor(.black.opacity(0.5)))
+                            .foregroundColor(Color.blackAndWhite.opacity(0.5)))
                             .keyboardType(keyboardType)
                             .autocapitalization(.none)
                             .padding(10)

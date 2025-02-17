@@ -20,7 +20,7 @@ struct GiftImagesPickerView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack(alignment: .top, spacing: 10) {
-                // ✅ Show fetched images from imageManager
+                //  Show fetched images from imageManager
                 ForEach(imageManager.fetchedImageURLs, id: \.self) { imageUrl in
                     ZStack(alignment: .topTrailing) {
                         AsyncImage(url: URL(string: imageUrl)) { image in
@@ -37,7 +37,7 @@ struct GiftImagesPickerView: View {
                     }
                 }
 
-                // ✅ Show manually selected images
+                //  Show manually selected images
                 ForEach(imageManager.imagePreviews) { preview in
                     ZStack(alignment: .topTrailing) {
                         Image(uiImage: preview.image)
@@ -50,7 +50,7 @@ struct GiftImagesPickerView: View {
                     }
                 }
 
-                // ✅ Show PhotosPicker if fewer than 4 images exist
+                //  Show PhotosPicker if fewer than 4 images exist
                 if (imageManager.imagePreviews.count + imageManager.fetchedImageURLs.count) < 4 {
                     PhotosPicker(selection: $imageManager.selectedImages, matching: .images) {
                         VStack {

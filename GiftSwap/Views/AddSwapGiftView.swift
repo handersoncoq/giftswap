@@ -83,7 +83,7 @@ struct AddSwapGiftView: View {
                     Text(category.rawValue.capitalized)
                 }
             }
-            .pickerStyle(MenuPickerStyle())
+            .pickerStyle(MenuPickerStyle()).padding(.leading, -12)
         }.frame(maxWidth: .infinity, alignment: .leading).padding(.top, -22)
     }
 

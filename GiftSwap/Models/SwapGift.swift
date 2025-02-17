@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SwapGift: Identifiable, Codable, Hashable {
+struct SwapGift: Identifiable, Codable, Hashable, GiftProtocol {
     var id: UUID
     var name: String
     var description: String

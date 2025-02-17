@@ -66,7 +66,7 @@ struct AddWishListView: View {
                     Text(category.rawValue.capitalized)
                 }
             }
-            .pickerStyle(MenuPickerStyle())
+            .pickerStyle(MenuPickerStyle()).padding(.leading, -12)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, -22)
@@ -75,7 +75,7 @@ struct AddWishListView: View {
     // MARK: - Visibility Toggle
     private var visibilityToggle: some View {
         Toggle("Make Wishlist Private", isOn: $viewModel.isPrivate)
-            .padding(.vertical, 10)
+            .padding(.vertical, 10).tint(Color("App_Primary")).padding(.trailing, 2)
     }
 
     // MARK: - Create Wishlist Button

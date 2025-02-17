@@ -72,16 +72,18 @@ struct WishGiftImageCarousel: View {
     @Binding var currentIndex: Int
 
     var body: some View {
-        if !gift.images.isEmpty {
+        if let imageURLs = gift.imageURLs, !imageURLs.isEmpty {
             ZStack {
                 TabView(selection: $currentIndex) {
-                    ForEach(gift.images.indices, id: \.self) { index in
-                        AsyncImage(url: URL(string: gift.images[index])) { phase in
+                    ForEach(imageURLs.indices, id: \.self) { index in
+                        AsyncImage(url: URL(string: imageURLs[index])) { phase in
                             switch phase {
                             case .empty:
                                 ProgressView().frame(height: 300)
                             case .success(let image):
-                                image.resizable().frame(maxWidth: 450, maxHeight: 270).cornerRadius(16)
+                                image.resizable()
+                                    .frame(maxWidth: 450, maxHeight: 270)
+                                    .cornerRadius(16)
                             case .failure:
                                 WishGiftPlaceholderView().frame(height: 300)
                             @unknown default:
@@ -94,9 +96,9 @@ struct WishGiftImageCarousel: View {
                 .frame(height: 270)
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
 
-                // Image Indicator
-                if gift.images.count > 1 {
-                    Text("\(currentIndex + 1)/\(gift.images.count)")
+                
+                if imageURLs.count > 1 {
+                    Text("\(currentIndex + 1)/\(imageURLs.count)")
                         .font(.body)
                         .foregroundColor(Color("App_Primary"))
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -108,6 +110,7 @@ struct WishGiftImageCarousel: View {
             WishGiftPlaceholderView().frame(height: 300)
         }
     }
+
 }
 
 // MARK: - Gift Details
@@ -141,13 +144,14 @@ struct WishGiftDetails: View {
                         .foregroundColor(.gray)
                 }
 
-                if !gift.storeLink.isEmpty, let url = URL(string: gift.storeLink) {
-                        Link(destination: url) {
-                            Image(systemName: "link")
-                                .foregroundColor(.blue)
-                                .padding(.leading, 5)
-                        }
+                if let storeLink = gift.storeLink, !storeLink.isEmpty, let url = URL(string: storeLink) {
+                    Link(destination: url) {
+                        Image(systemName: "link")
+                            .foregroundColor(.blue)
+                            .padding(.leading, 5)
                     }
+                }
+
             }
 
 

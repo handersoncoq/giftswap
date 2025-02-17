@@ -27,22 +27,22 @@ class GiftMatchingService {
 
     // Finds a matching gift based on multiple criteria
     private func findMatchingGift(gift: SwapGift, swapGifts: [SwapGift]) -> (SwapGift, SwapGift)? {
-        // 1️⃣ Exact Name Match
+        // Exact Name Match
         if let match = swapGifts.first(where: { $0.name.lowercased() == gift.name.lowercased() }) {
             return (gift, match)
         }
 
-        // 2️⃣ Description Similarity Match
+        // Description Similarity Match
         if let match = swapGifts.first(where: { self.isDescriptionSimilar(gift.description, $0.description) }) {
             return (gift, match)
         }
 
-        // 3️⃣ Category-Based Match
+        // Category-Based Match
         if let match = swapGifts.first(where: { $0.category == gift.category }) {
             return (gift, match)
         }
 
-        // 4️⃣ Value-Based Match (Within 20% Price Range)
+        // Value-Based Match (Within 20% Price Range)
         if let match = swapGifts.first(where: {
             abs($0.value - gift.value) / gift.value <= 0.2
         }) {
@@ -63,8 +63,11 @@ class GiftMatchingService {
     // Start the matching process for a user
     func startMatchingProcess(for userId: UUID) -> AnyPublisher<(SwapGift, SwapGift)?, Error> {
         return SwapBasketService.shared.fetchUserSwapBasketGifts(userId: userId)
-            .flatMap { userSwapGifts in
-                guard let userGift = userSwapGifts.first else {
+            .map { userSwapGifts in
+                userSwapGifts.filter { $0.swapStatus == .available }
+            }
+            .flatMap { availableGifts in
+                guard let userGift = availableGifts.first else {
                     return Just<(SwapGift, SwapGift)?>(nil)
                         .setFailureType(to: Error.self)
                         .eraseToAnyPublisher()
@@ -73,5 +76,31 @@ class GiftMatchingService {
             }
             .eraseToAnyPublisher()
     }
+
+    
+    func updateGiftStatus(_ gift: SwapGift) -> AnyPublisher<Bool, Error> {
+        return SwapBasketService.shared.updateSwapStatus(for: gift.id, to: .pending)
+            .receive(on: DispatchQueue.main)
+            .flatMap { success -> AnyPublisher<Bool, Error> in
+                guard success else {
+                    return Fail(error: NSError(domain: "GiftMatchingService", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to update swap basket status"]))
+                        .eraseToAnyPublisher()
+                }
+
+                guard var updatedGift = SwapGiftService.shared.getGift(by: gift.id) else {
+                    return Fail(error: NSError(domain: "GiftMatchingService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Gift not found"]))
+                        .eraseToAnyPublisher()
+                }
+
+                updatedGift.swapStatus = .pending
+
+                return SwapGiftService.shared.updateGift(updatedGift)
+                    .map { _ in true } 
+                    .eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+    }
+
+
 }
 

@@ -105,7 +105,7 @@ struct WishlistView: View {
                                     ).padding(.top, -20)
 
                                 }
-                            }
+                            }.padding(.horizontal, 12)
                         }.padding(.bottom, 25)
                     }
                 }

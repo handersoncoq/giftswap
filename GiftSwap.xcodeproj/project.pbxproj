@@ -33,22 +33,9 @@
 		5972ADE92D4868360051EA27 /* GiftSwapUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GiftSwapUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		599B9E0C2D5D0FAE00B4D5AD /* Exceptions for "GiftSwap" folder in "GiftSwap" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Utilities/Reusables/Untitled.swift,
-			);
-			target = 5972ADCE2D4868320051EA27 /* GiftSwap */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		5972ADD12D4868320051EA27 /* GiftSwap */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				599B9E0C2D5D0FAE00B4D5AD /* Exceptions for "GiftSwap" folder in "GiftSwap" target */,
-			);
 			path = GiftSwap;
 			sourceTree = "<group>";
 		};

@@ -17,6 +17,10 @@ class SwapGiftService {
         get { MockSwapGifts.gifts }
         set { MockSwapGifts.gifts = newValue }
     }
+    
+    func getGift(by id: UUID) -> SwapGift? {
+        return gifts.first { $0.id == id }
+    }
 
 
     // Fetch gifts with optional filters (availability, category, owner)

@@ -110,7 +110,7 @@ class WishGiftFormViewModel: ObservableObject {
 
                     self.name = gift.name
                     self.description = gift.description
-                    self.images = gift.images
+                    self.images = gift.imageURLs ?? []
                     self.priceString = gift.price != nil ? String(format: "%.2f", gift.price!) : ""
                     self.currency = gift.currency ?? "USD"
                     self.brand = gift.brand ?? "n/a"

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SecondaryButton: View {
     var action: () -> Void
-    var title: String
+    var label: String
     var isLoading: Bool = false
     var backgroundColor: Color = Color("App_Primary")
     var foregroundColor: Color = .white
@@ -21,7 +21,7 @@ struct SecondaryButton: View {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 }
-                Text(isLoading ? "Fetching..." : title)
+                Text(isLoading ? "Fetching..." : label)
                     .foregroundColor(foregroundColor)
                     .fontWeight(.medium)
             }
